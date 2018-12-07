@@ -1,3 +1,5 @@
+//START CAMILLE
+
 /*
  * This file is part of Cleanflight.
  *
@@ -18,7 +20,6 @@
 /*
  Created by Marcin Baliniak
  some functions based on MinimOSD
-
  OSD-CMS separation by jflyper
  */
 
@@ -1065,7 +1066,7 @@ static void osdDrawMap(int referenceHeading, uint8_t referenceSym, uint8_t cente
 //START CAMILLE
 
 //REPLACE ORIGINAL FUNCTION (keep care it begin by static uint16 now)
-static void osdDrawRadarMap(wp_planes_t *planes,int plane_id, uint16_t *drawn, uint32_t *usedScale)
+static pos_t osdDrawRadarMap(wp_planes_t *planes,int plane_id, uint16_t *drawn, uint32_t *usedScale)
 {
     //REMOVED CENTER SYMP
     //REMOVED BLINKING WHEN POINT OVER ME
@@ -1073,7 +1074,9 @@ static void osdDrawRadarMap(wp_planes_t *planes,int plane_id, uint16_t *drawn, u
     uint8_t referenceSym=0;
     wp_planes_t currentPlane=planes[plane_id];
     uint32_t poiDistance=currentPlane.GPS_directionToMe;
-
+	pos_t currentPos;
+	currentPos.x=0;
+	currentPos.y=0;
     //TODO : TEST FRONT VIEW EXPERIMENTAL
     //uint32_t poiDistance=planes[plane_id].GPS_altitudeToMe;
     int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
@@ -1105,7 +1108,7 @@ static void osdDrawRadarMap(wp_planes_t *planes,int plane_id, uint16_t *drawn, u
     displayWriteChar(osdDisplayPort, minX, maxY, SYM_SCALE);
 
      if (OSD_VISIBLE(currentPlane.drawn)) {
-        displayWriteChar(osdDisplayPort, OSD_X(currentPlane.drawn), OSD_Y(currentPlane.drawn), SYM_BLANK);
+        displayWriteChar(osdDisplayPort, currentPlane.posX, currentPlane.posX, SYM_BLANK);
         *drawn = 0;
     }
 
@@ -1204,16 +1207,18 @@ static void osdDrawRadarMap(wp_planes_t *planes,int plane_id, uint16_t *drawn, u
                 int mapHeading = osdGetHeadingAngle(DECIDEGREES_TO_DEGREES(osdGetHeading()) - referenceHeading);
                 poiSymbol += mapHeading * 2 / 45;
             }
-    			 
+
             displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
 
             // Update saved location
             *drawn = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
             //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
-            currentPlane.drawn=*drawn;
+            currentPos.x=poiX;
+			currentPos.y=poiY;
+            //return currentPos;
             break;
         }
-	
+		
     }
 
     // Draw the used scale
@@ -1231,7 +1236,7 @@ static void osdDrawRadarMap(wp_planes_t *planes,int plane_id, uint16_t *drawn, u
     displayWrite(osdDisplayPort, minX + 1, maxY+1, buf);
     */
 
-
+return currentPos;
 }
 
 /* Draws a map with the home in the center and the craft moving around.
@@ -1573,16 +1578,19 @@ static bool osdDrawSingleElement(uint8_t item)
             {
                 static uint16_t drawn = 0;
                 static uint32_t scale = 0;
+				pos_t currentPos;
                // osdDrawRadar(&drawn, &scale);
     //START CAMILLE
 
                 //DISPLAY RADARMAP
                 for (int i = 0; i < (MAX_PLANES); i++) {
                     if (planesInfos[i].planeWP.lat!=0){
-                        osdDrawRadarMap(planesInfos,i,&drawn, &scale);
+                        currentPos=osdDrawRadarMap(planesInfos,i,&drawn, &scale);
+						planesInfos[i].posX=currentPos.x;
+						planesInfos[i].posY=currentPos.y;
                     }
                 }
-  
+
 
                // osdDrawRadar(&drawn, &scale);
     //END CAMILLE

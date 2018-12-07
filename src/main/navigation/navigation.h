@@ -52,6 +52,8 @@ typedef struct wp_planes_s  {
     int16_t GPS_altitudeToMe;
     int16_t planePoiDirection;
     uint16_t drawn;
+    int posX;
+    int posY;
 } wp_planes_t;
 
 //Numbers MAX of planes

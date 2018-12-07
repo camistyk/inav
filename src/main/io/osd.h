@@ -35,6 +35,11 @@
 #define OSD_POS_MAX         0x3FF
 #define OSD_POS_MAX_CLI     (OSD_POS_MAX | OSD_VISIBLE_FLAG)
 
+typedef struct pos_s{
+ int x;
+ int y;
+} pos_t;
+
 typedef enum {
     OSD_RSSI_VALUE,
     OSD_MAIN_BATT_VOLTAGE,
