@@ -129,6 +129,7 @@
 static unsigned currentLayout = 0;
 static int layoutOverride = -1;
 
+
 typedef struct statistic_s {
     uint16_t max_speed;
     uint16_t min_voltage; // /100
@@ -1274,7 +1275,8 @@ static void osdDrawRadarMapSimple(wp_planes_t *planes, int plane_id, uint16_t *d
 
     
  //    if (OSD_VISIBLE(currentPlane.drawn)) {
-        displayWriteChar(osdDisplayPort, *drawnPlanes, *drawnPlanes, SYM_BLANK);
+        displayWriteChar(osdDisplayPort, OSD_X(*drawnPlanes), OSD_Y(*drawnPlanes), SYM_BLANK);
+
  //       *drawn = 0;
   //  }
 
