@@ -1241,20 +1241,15 @@ return currentPos;
 }
 
 
-static pos_t osdDrawRadarMapSimple(wp_planes_t *planes, uint16_t *drawn, uint32_t *usedScale)
+static void osdDrawRadarMapSimple(wp_planes_t *planes, int plane_id, uint16_t *drawnPlanes, uint32_t *usedScale)
 {
     //REMOVED CENTER SYMP
     //REMOVED BLINKING WHEN POINT OVER ME
     int referenceHeading=DECIDEGREES_TO_DEGREES(osdGetHeading());
     uint8_t referenceSym=0;
-    int plane_id=0;
     wp_planes_t currentPlane=planes[plane_id];
     uint32_t poiDistance=currentPlane.GPS_directionToMe;
-	pos_t currentPos;
-	currentPos.x=0;
-	currentPos.y=0;
     //TODO : TEST FRONT VIEW EXPERIMENTAL
-    //uint32_t poiDistance=planes[plane_id].GPS_altitudeToMe;
     int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
     uint8_t poiSymbol=SYM_ARROW_DOWN;
 
@@ -1279,7 +1274,7 @@ static pos_t osdDrawRadarMapSimple(wp_planes_t *planes, uint16_t *drawn, uint32_
 
     
  //    if (OSD_VISIBLE(currentPlane.drawn)) {
-        displayWriteChar(osdDisplayPort, currentPlane.posX, currentPlane.posX, SYM_BLANK);
+        displayWriteChar(osdDisplayPort, *drawnPlanes, *drawnPlanes, SYM_BLANK);
  //       *drawn = 0;
   //  }
 
@@ -1319,7 +1314,7 @@ static pos_t osdDrawRadarMapSimple(wp_planes_t *planes, uint16_t *drawn, uint32_
             displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
 
             // Update saved location
-            *drawn = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+            *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
             //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
             break;
         }
@@ -1666,6 +1661,7 @@ static bool osdDrawSingleElement(uint8_t item)
     case OSD_RADAR:
             {
                 static uint16_t drawn = 0;
+                static uint16_t drawnPlanes = 0;
                 static uint32_t scale = 0;
 				pos_t currentPos;
                // osdDrawRadar(&drawn, &scale);
@@ -1673,7 +1669,7 @@ static bool osdDrawSingleElement(uint8_t item)
 
                 //DISPLAY RADARMAP
                 if (planesInfos[0].planeWP.lat!=0){
-                    currentPos=osdDrawRadarMapSimple(planesInfos,&drawn, &scale);
+                    currentPos=osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
                 }
                // osdDrawRadar(&drawn, &scale);
     //END CAMILLe
