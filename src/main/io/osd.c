@@ -128,7 +128,7 @@
 
 static unsigned currentLayout = 0;
 static int layoutOverride = -1;
-static uint16_t posePlanes[] ={0};
+
 
 typedef struct statistic_s {
     uint16_t max_speed;
@@ -1275,7 +1275,7 @@ static void osdDrawRadarMapSimple(wp_planes_t *planes, int plane_id, uint16_t *d
 
     
  //    if (OSD_VISIBLE(currentPlane.drawn)) {
-        displayWriteChar(osdDisplayPort, posePlanes[0],posePlanes[1], SYM_BLANK);
+        displayWriteChar(osdDisplayPort, OSD_X(*drawnPlanes), OSD_Y(*drawnPlanes), SYM_BLANK);
 
  //       *drawn = 0;
   //  }
@@ -1316,9 +1316,7 @@ static void osdDrawRadarMapSimple(wp_planes_t *planes, int plane_id, uint16_t *d
             displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
 
             // Update saved location
-            posePlanes[0]=poiX;
-            posePlanes[1]=poiY;
-            *drawnPlanes= OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+            *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
             //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
             break;
         }
