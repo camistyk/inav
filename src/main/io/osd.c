@@ -1066,6 +1066,7 @@ static void osdDrawMap(int referenceHeading, uint8_t referenceSym, uint8_t cente
 //START CAMILLE
 
 //REPLACE ORIGINAL FUNCTION (keep care it begin by static uint16 now)
+
 static pos_t osdDrawRadarMap(wp_planes_t *planes,int plane_id, uint16_t *drawn, uint32_t *usedScale)
 {
     //REMOVED CENTER SYMP
@@ -1238,6 +1239,94 @@ static pos_t osdDrawRadarMap(wp_planes_t *planes,int plane_id, uint16_t *drawn, 
 
 return currentPos;
 }
+
+
+static pos_t osdDrawRadarMapSimple(wp_planes_t *planes, uint16_t *drawn, uint32_t *usedScale)
+{
+    //REMOVED CENTER SYMP
+    //REMOVED BLINKING WHEN POINT OVER ME
+    int referenceHeading=DECIDEGREES_TO_DEGREES(osdGetHeading());
+    uint8_t referenceSym=0;
+    int plane_id=0;
+    wp_planes_t currentPlane=planes[plane_id];
+    uint32_t poiDistance=currentPlane.GPS_directionToMe;
+	pos_t currentPos;
+	currentPos.x=0;
+	currentPos.y=0;
+    //TODO : TEST FRONT VIEW EXPERIMENTAL
+    //uint32_t poiDistance=planes[plane_id].GPS_altitudeToMe;
+    int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
+    uint8_t poiSymbol=SYM_ARROW_DOWN;
+
+    // TODO: These need to be tested with several setups. We might
+    // need to make them configurable.
+    const int hMargin = 1;
+    const int vMargin = 1;
+
+    // TODO: Get this from the display driver?
+    const int charWidth = 12;
+    const int charHeight = 18;
+
+    char buf[16];
+
+    uint8_t minX = hMargin;
+    uint8_t maxX = osdDisplayPort->cols - 1 - hMargin;
+    uint8_t minY = vMargin;
+    uint8_t maxY = osdDisplayPort->rows - 1 - vMargin;
+    uint8_t midX = osdDisplayPort->cols / 2;
+    uint8_t midY = osdDisplayPort->rows / 2;
+    const unsigned scaleMultiplier = 2; 
+
+    
+ //    if (OSD_VISIBLE(currentPlane.drawn)) {
+        displayWriteChar(osdDisplayPort, currentPlane.posX, currentPlane.posX, SYM_BLANK);
+ //       *drawn = 0;
+  //  }
+
+    uint32_t initialScale;
+    initialScale = 10; // 10m as initial scale
+
+    // Try to keep the same scale when getting closer until we draw over the center point
+    uint32_t scale = initialScale;
+
+    if (STATE(GPS_FIX)) {
+
+        int directionToPoi = osdGetHeadingAngle(poiDirection - referenceHeading);
+        float poiAngle = DEGREES_TO_RADIANS(directionToPoi);
+        float poiSin = sin_approx(poiAngle);
+        float poiCos = cos_approx(poiAngle);
+
+        // Now start looking for a valid scale that lets us draw everything
+        int ii;
+        for (ii = 0; ii < 50; ii++) {
+            // Calculate location of the aircraft in map
+            int points = poiDistance / ((float)scale / charHeight);
+
+            float pointsX = points * poiSin;
+            int poiX = midX - roundf(pointsX / charWidth);
+            if (poiX < minX || poiX > maxX) {
+                scale *= scaleMultiplier;
+                continue;
+            }
+
+            float pointsY = points * poiCos;
+            int poiY = midY + roundf(pointsY / charHeight);
+            if (poiY < minY || poiY > maxY) {
+                scale *= scaleMultiplier;
+                continue;
+            }
+
+            displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
+
+            // Update saved location
+            *drawn = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+            //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
+            break;
+        }
+		
+    }
+}
+
 
 /* Draws a map with the home in the center and the craft moving around.
  * See osdDrawMap() for reference.
@@ -1573,28 +1662,21 @@ static bool osdDrawSingleElement(uint8_t item)
             osdDrawHomeMap(CENTIDEGREES_TO_DEGREES(navigationGetHomeHeading()), 'T', &drawn, &scale);
             return true;
         }
-        //REPLACE ORIGINAL Case
+        
     case OSD_RADAR:
             {
                 static uint16_t drawn = 0;
                 static uint32_t scale = 0;
 				pos_t currentPos;
                // osdDrawRadar(&drawn, &scale);
-    //START CAMILLE
+               //START CAMILLE
 
                 //DISPLAY RADARMAP
-                for (int i = 0; i < (MAX_PLANES); i++) {
-                    if (planesInfos[i].planeWP.lat!=0){
-                        currentPos=osdDrawRadarMap(planesInfos,i,&drawn, &scale);
-						planesInfos[i].posX=currentPos.x;
-						planesInfos[i].posY=currentPos.y;
-                    }
+                if (planesInfos[0].planeWP.lat!=0){
+                    currentPos=osdDrawRadarMapSimple(planesInfos,&drawn, &scale);
                 }
-
-
                // osdDrawRadar(&drawn, &scale);
-    //END CAMILLE
-
+    //END CAMILLe
                 return true;
             }
 #endif // GPS
