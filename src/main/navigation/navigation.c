@@ -71,7 +71,7 @@ gpsLocation_t GPS_home;
 uint16_t      GPS_distanceToHome;        // distance to home point in meters
 int16_t       GPS_directionToHome;       // direction to home point in degrees
 //START CAMILLE
-wp_planes_t  planesInfos[5];
+wp_planes_t  planesInfos[MAX_PLANES];
 
 //END CAM
 #if defined(USE_NAV)
@@ -2141,12 +2141,13 @@ void updateHomePosition(void)
 			//INITIALISE 5 PLANES (waypoint 100 to 105)
 			for (int i = 0; i < 4; i++) {
 				planesInfos[i].planeWP.lat=0;
+                planesInfos[i].drawn=0;
 				planesInfos[i].planeWP.lon=0;
 				planesInfos[i].planeWP.alt=0;
 			}
 
             int y=0; // plane array init
-            for (int i = 1; i < 6; i++) { //store waypoint 1 to 5
+            for (int i = 1; i < MAX_PLANES+1; i++) { //store waypoint 1 to 5
                     getWaypoint(i,&planesInfos[y].planeWP); //load waypoint informations
                     planesInfos[y].wp_nb=i; //store wp number
 
@@ -2157,6 +2158,7 @@ void updateHomePosition(void)
                     geoConvertGeodeticToLocal(&posControl.gpsOrigin, &planeLocation, &posPlane, GEO_ALT_ABSOLUTE);
                     planesInfos[y].GPS_directionToMe= calculateDistanceToDestination(&posPlane);
                     planesInfos[y].planePoiDirection=calculateDistanceToDestination(&posPlane);
+                    planesInfos[y].GPS_altitudeToMe=calculateAltitudeToMe(&posPlane);
 					y++;
                 }
 
