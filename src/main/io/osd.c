@@ -1669,7 +1669,7 @@ static bool osdDrawSingleElement(uint8_t item)
 
                 //DISPLAY RADARMAP
                 if (planesInfos[0].planeWP.lat!=0){
-                    currentPos=osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
+                    currentPos=osdDrawRadarMapSimple(planesInfos,0,&drawnPlanes, &scale);
                 }
                // osdDrawRadar(&drawn, &scale);
     //END CAMILLe
