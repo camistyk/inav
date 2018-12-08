@@ -1066,7 +1066,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         uint32_t poiDistance=currentPlane.GPS_directionToMe;
         //TODO : TEST FRONT VIEW EXPERIMENTAL
         //uint32_t poiDistance=planes[plane_id].GPS_altitudeToMe;
-        int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
+        int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection+5);
         uint8_t poiSymbol=SYM_PLANE;
         uint8_t poiSymbolPlaneSight=SYM_ARROW_UP;
 
@@ -1092,7 +1092,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         if (plane_id_near==plane_id){
             poiSymbol=SYM_PLANE_SIGHT;
         }
-
+ 
         // TODO: These need to be tested with several setups. We might
         // need to make them configurable.
         const int hMargin = 1;
