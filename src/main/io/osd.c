@@ -296,26 +296,7 @@ static void osdFormatDistanceSymbol(char *buff, int32_t dist)
         break;
     }
 }
-//START CAM
-/**
- * Get the minimum value in Array
- * @param numbers of planes
- */
-static int getNearPlaneNumber() {
-  int c, min, index;
 
-  min = planesInfos[0].planeWP.alt;
-  index = 0;
-
-  for (c = 0; c < MAX_PLANES; c++) {
-    if (planesInfos[c].planeWP.alt < min) {
-       index = c;
-       min = planesInfos[c].planeWP.alt;
-    }
-  }
-
-  return index;
-}
 
 /**
  * Converts distance into a string based on the current unit system.
@@ -1088,6 +1069,29 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
         uint8_t poiSymbol=SYM_ARROW_DOWN;
 
+        /* CALCULATE NEAREST PLANE ID
+        *
+        * */
+        int min,index,c;
+        min = currentPlane.GPS_directionToMe;
+        index = 0;
+
+        for (c = 0; c < MAX_PLANES; c++) {
+            if ((planes[c].GPS_directionToMe!=0) &&  (c!=plane_id)){
+                    if (planes[c].GPS_directionToMe < min) {
+                    index = c;
+                    min = planes[c].GPS_directionToMe;
+                    }
+            }
+        }
+        //END CALCULATE
+        int plane_id_near=index;
+
+
+        if (plane_id_near==plane_id){
+            poiSymbol=SYM_AH_CROSSHAIRS_AIRCRAFT0;
+        }
+
         // TODO: These need to be tested with several setups. We might
         // need to make them configurable.
         const int hMargin = 1;
@@ -1233,104 +1237,16 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         *usedScale = scale;
 
         //DRAW altitude of nearest plane EXPERIMENTAL
-        /*
-        int nearPlaneNumber=getNearPlaneNumber()
-        buf[3] = planes[getNearPlaneNumber].planeWP.alt;
+        
+        buf[3] = planes[plane_id_near].planeWP.alt;
         buf[4] = 'm';
         displayWrite(osdDisplayPort, minX + 1, maxY+1, buf);
-        */
+        
 
     }
 }
 
 
-static void osdDrawRadarMapSimple(wp_planes_t *planes,uint16_t *drawnPlanes, uint32_t *usedScale)
-{
-    //REMOVED CENTER SYMP
-    //REMOVED BLINKING WHEN POINT OVER ME
-    int referenceHeading=DECIDEGREES_TO_DEGREES(osdGetHeading());
-    uint8_t referenceSym=0;
-    int plane_id=0;
-for (plane_id=0;plane_id<MAX_PLANES;plane_id++)
-{
-
-                    wp_planes_t currentPlane=planes[plane_id];
-                    uint32_t poiDistance=currentPlane.GPS_directionToMe;
-                    //TODO : TEST FRONT VIEW EXPERIMENTAL
-                    int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
-                    uint8_t poiSymbol=SYM_ARROW_DOWN;
-
-                    // TODO: These need to be tested with several setups. We might
-                    // need to make them configurable.
-                    const int hMargin = 1;
-                    const int vMargin = 1;
-
-                    // TODO: Get this from the display driver?
-                    const int charWidth = 12;
-                    const int charHeight = 18;
-
-                    char buf[16];
-
-                    uint8_t minX = hMargin;
-                    uint8_t maxX = osdDisplayPort->cols - 1 - hMargin;
-                    uint8_t minY = vMargin;
-                    uint8_t maxY = osdDisplayPort->rows - 1 - vMargin;
-                    uint8_t midX = osdDisplayPort->cols / 2;
-                    uint8_t midY = osdDisplayPort->rows / 2;
-                    const unsigned scaleMultiplier = 2; 
-
-                    
-                //    if (OSD_VISIBLE(currentPlane.drawn)) {
-                        displayWriteChar(osdDisplayPort, OSD_X(myDrawn[plane_id]), OSD_Y(myDrawn[plane_id]), SYM_BLANK);
-
-                //       *drawn = 0;
-                //  }
-
-                    uint32_t initialScale;
-                    initialScale = 10; // 10m as initial scale
-
-                    // Try to keep the same scale when getting closer until we draw over the center point
-                    uint32_t scale = initialScale;
-
-                    if (STATE(GPS_FIX)) {
-
-                        int directionToPoi = osdGetHeadingAngle(poiDirection - referenceHeading);
-                        float poiAngle = DEGREES_TO_RADIANS(directionToPoi);
-                        float poiSin = sin_approx(poiAngle);
-                        float poiCos = cos_approx(poiAngle);
-
-                        // Now start looking for a valid scale that lets us draw everything
-                        int ii;
-                        for (ii = 0; ii < 50; ii++) {
-                            // Calculate location of the aircraft in map
-                            int points = poiDistance / ((float)scale / charHeight);
-
-                            float pointsX = points * poiSin;
-                            int poiX = midX - roundf(pointsX / charWidth);
-                            if (poiX < minX || poiX > maxX) {
-                                scale *= scaleMultiplier;
-                                continue;
-                            }
-
-                            float pointsY = points * poiCos;
-                            int poiY = midY + roundf(pointsY / charHeight);
-                            if (poiY < minY || poiY > maxY) {
-                                scale *= scaleMultiplier;
-                                continue;
-                            }
-
-                            displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
-
-                            // Update saved location
-                            myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
-                            *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
-                            //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
-                            break;
-                        }
-                        
-                    }
-                }
-}
 
 
 /* Draws a map with the home in the center and the craft moving around.
