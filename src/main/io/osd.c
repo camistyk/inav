@@ -1240,7 +1240,15 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         if (plane_id_near==plane_id){
         bool altPlane = osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.alt, scaleUnitDivisor, maxDecimals, 2, 3);
         buf[3] = '\0';
-        displayWrite(osdDisplayPort, minX + 1, maxY+1, buf);
+        displayWrite(osdDisplayPort, minX + 1, maxY-1, buf);
+
+        //DRAW SPEED PLANE NEAREST PLANE
+        if (plane_id_near==plane_id){
+        bool altPlane = osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.p1 * scaleToUnit, scaleUnitDivisor, maxDecimals, 2, 3);
+        buf[3] = SYM_KMH;
+        buf[4] = '\0';
+        displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
+        }
         }
 
     }
