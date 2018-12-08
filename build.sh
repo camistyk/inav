@@ -1,2 +1,5 @@
-echo "Building target" $1
-docker run --rm -v `pwd`:/home/src/ flyandi/docker-inav make TARGET=$1
+make TARGET="OMNIBUSF4PRO"
+make TARGET="MATEKF405OSD"
+make TARGET="MATEKF405SE"
+make TARGET="MATEKF405"
+cp ./obj/*.hex ./releases/
