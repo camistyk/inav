@@ -1670,7 +1670,7 @@ static bool osdDrawSingleElement(uint8_t item)
         
     case OSD_RADAR:
             {
-                //static uint16_t drawn = 0;
+                static uint16_t drawn = 0;
                 static uint16_t drawnPlanes = 0;
                 static uint32_t scale = 0;
                // osdDrawRadar(&drawn, &scale);
@@ -1678,10 +1678,11 @@ static bool osdDrawSingleElement(uint8_t item)
 
                 //DISPLAY RADARMAP
                 if (planesInfos[0].planeWP.lat!=0){
-                    osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
+                   // osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
+                    //NEXT TEST WITH BIG FUNCTION
+                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale);
                 }
                // osdDrawRadar(&drawn, &scale);
-    //END CAMILLe
                 return true;
             }
 #endif // GPS
