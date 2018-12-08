@@ -1067,7 +1067,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         //TODO : TEST FRONT VIEW EXPERIMENTAL
         //uint32_t poiDistance=planes[plane_id].GPS_altitudeToMe;
         int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
-        uint8_t poiSymbol=SYM_ARROW_DOWN;
+        uint8_t poiSymbol=SYM_PLANE;
 
         /* CALCULATE NEAREST PLANE ID
         *
@@ -1230,25 +1230,27 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         }
 
         // Draw the used scale
-        bool scaled = osdFormatCentiNumber(buf, scale * scaleToUnit, scaleUnitDivisor, maxDecimals, 2, 3);
+       /* bool scaled = osdFormatCentiNumber(buf, scale * scaleToUnit, scaleUnitDivisor, maxDecimals, 2, 3);
         buf[3] = scaled ? symScaled : symUnscaled;
         buf[4] = '\0';
         displayWrite(osdDisplayPort, minX + 1, maxY, buf);
-        *usedScale = scale;
+        *usedScale = scale;*/
 
         //DRAW altitude of nearest plane EXPERIMENTAL
         if (plane_id_near==plane_id){
         bool altPlane = osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.alt, scaleUnitDivisor, maxDecimals, 2, 3);
-        buf[3] = '\0';
+        buf[3]=SYM_ALT_KM;
+        buf[4] = '\0';
         displayWrite(osdDisplayPort, minX + 1, maxY-1, buf);
 
         //DRAW SPEED PLANE NEAREST PLANE
         if (plane_id_near==plane_id){
-        bool altPlane = osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.p1 * scaleToUnit, scaleUnitDivisor, maxDecimals, 2, 3);
+        bool altPlane = osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.p1, scaleUnitDivisor, maxDecimals, 2, 3);
         buf[3] = SYM_KMH;
         buf[4] = '\0';
         displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
         }
+
         }
 
     }
@@ -1606,7 +1608,7 @@ static bool osdDrawSingleElement(uint8_t item)
                     //NEXT TEST WITH BIG FUNCTION
                     osdDrawRadarMap(planesInfos,&drawnPlanes, &scale);
                 }
-               // osdDrawRadar(&drawn, &scale);
+                osdDrawRadar(&drawn, &scale);
                 return true;
             }
 #endif // GPS

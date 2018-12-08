@@ -91,6 +91,7 @@
 #define SYM_RANGE_MAX  0x24
 #define SYM_DIRECTION  0x72
 #define SYM_PLANE_SIGHT 0x98
+#define SYM_PLANE      0xA8 
 
 // GPS Coordinates and Altitude
 #define SYM_LAT 0xA6
