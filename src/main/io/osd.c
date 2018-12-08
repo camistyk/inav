@@ -1089,7 +1089,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
 
 
         if (plane_id_near==plane_id){
-            poiSymbol=SYM_AH_CROSSHAIRS_AIRCRAFT0;
+            poiSymbol=SYM_PLANE_SIGHT;
         }
 
         // TODO: These need to be tested with several setups. We might
@@ -1237,11 +1237,11 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         *usedScale = scale;
 
         //DRAW altitude of nearest plane EXPERIMENTAL
-        
-        buf[3] = planes[plane_id_near].planeWP.alt;
-        buf[4] = 'm';
+        if (plane_id_near==plane_id){
+        bool altPlane = osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.alt, scaleUnitDivisor, maxDecimals, 2, 3);
+        buf[3] = '\0';
         displayWrite(osdDisplayPort, minX + 1, maxY+1, buf);
-        
+        }
 
     }
 }
