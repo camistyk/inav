@@ -1245,87 +1245,92 @@ return currentPos;
 }
 
 
-static void osdDrawRadarMapSimple(wp_planes_t *planes, int plane_id, uint16_t *drawnPlanes, uint32_t *usedScale)
+static void osdDrawRadarMapSimple(wp_planes_t *planes,uint16_t *drawnPlanes, uint32_t *usedScale)
 {
     //REMOVED CENTER SYMP
     //REMOVED BLINKING WHEN POINT OVER ME
     int referenceHeading=DECIDEGREES_TO_DEGREES(osdGetHeading());
     uint8_t referenceSym=0;
-    wp_planes_t currentPlane=planes[plane_id];
-    uint32_t poiDistance=currentPlane.GPS_directionToMe;
-    //TODO : TEST FRONT VIEW EXPERIMENTAL
-    int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
-    uint8_t poiSymbol=SYM_ARROW_DOWN;
+    int plane_id=0;
+for (plane_id=0;plane_id<MAX_PLANES;plane_id++)
+{
 
-    // TODO: These need to be tested with several setups. We might
-    // need to make them configurable.
-    const int hMargin = 1;
-    const int vMargin = 1;
+                    wp_planes_t currentPlane=planes[plane_id];
+                    uint32_t poiDistance=currentPlane.GPS_directionToMe;
+                    //TODO : TEST FRONT VIEW EXPERIMENTAL
+                    int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection + 180);
+                    uint8_t poiSymbol=SYM_ARROW_DOWN;
 
-    // TODO: Get this from the display driver?
-    const int charWidth = 12;
-    const int charHeight = 18;
+                    // TODO: These need to be tested with several setups. We might
+                    // need to make them configurable.
+                    const int hMargin = 1;
+                    const int vMargin = 1;
 
-    char buf[16];
+                    // TODO: Get this from the display driver?
+                    const int charWidth = 12;
+                    const int charHeight = 18;
 
-    uint8_t minX = hMargin;
-    uint8_t maxX = osdDisplayPort->cols - 1 - hMargin;
-    uint8_t minY = vMargin;
-    uint8_t maxY = osdDisplayPort->rows - 1 - vMargin;
-    uint8_t midX = osdDisplayPort->cols / 2;
-    uint8_t midY = osdDisplayPort->rows / 2;
-    const unsigned scaleMultiplier = 2; 
+                    char buf[16];
 
-    
- //    if (OSD_VISIBLE(currentPlane.drawn)) {
-        displayWriteChar(osdDisplayPort, OSD_X(myDrawn[plane_id]), OSD_Y(myDrawn[plane_id]), SYM_BLANK);
+                    uint8_t minX = hMargin;
+                    uint8_t maxX = osdDisplayPort->cols - 1 - hMargin;
+                    uint8_t minY = vMargin;
+                    uint8_t maxY = osdDisplayPort->rows - 1 - vMargin;
+                    uint8_t midX = osdDisplayPort->cols / 2;
+                    uint8_t midY = osdDisplayPort->rows / 2;
+                    const unsigned scaleMultiplier = 2; 
 
- //       *drawn = 0;
-  //  }
+                    
+                //    if (OSD_VISIBLE(currentPlane.drawn)) {
+                        displayWriteChar(osdDisplayPort, OSD_X(myDrawn[plane_id]), OSD_Y(myDrawn[plane_id]), SYM_BLANK);
 
-    uint32_t initialScale;
-    initialScale = 10; // 10m as initial scale
+                //       *drawn = 0;
+                //  }
 
-    // Try to keep the same scale when getting closer until we draw over the center point
-    uint32_t scale = initialScale;
+                    uint32_t initialScale;
+                    initialScale = 10; // 10m as initial scale
 
-    if (STATE(GPS_FIX)) {
+                    // Try to keep the same scale when getting closer until we draw over the center point
+                    uint32_t scale = initialScale;
 
-        int directionToPoi = osdGetHeadingAngle(poiDirection - referenceHeading);
-        float poiAngle = DEGREES_TO_RADIANS(directionToPoi);
-        float poiSin = sin_approx(poiAngle);
-        float poiCos = cos_approx(poiAngle);
+                    if (STATE(GPS_FIX)) {
 
-        // Now start looking for a valid scale that lets us draw everything
-        int ii;
-        for (ii = 0; ii < 50; ii++) {
-            // Calculate location of the aircraft in map
-            int points = poiDistance / ((float)scale / charHeight);
+                        int directionToPoi = osdGetHeadingAngle(poiDirection - referenceHeading);
+                        float poiAngle = DEGREES_TO_RADIANS(directionToPoi);
+                        float poiSin = sin_approx(poiAngle);
+                        float poiCos = cos_approx(poiAngle);
 
-            float pointsX = points * poiSin;
-            int poiX = midX - roundf(pointsX / charWidth);
-            if (poiX < minX || poiX > maxX) {
-                scale *= scaleMultiplier;
-                continue;
-            }
+                        // Now start looking for a valid scale that lets us draw everything
+                        int ii;
+                        for (ii = 0; ii < 50; ii++) {
+                            // Calculate location of the aircraft in map
+                            int points = poiDistance / ((float)scale / charHeight);
 
-            float pointsY = points * poiCos;
-            int poiY = midY + roundf(pointsY / charHeight);
-            if (poiY < minY || poiY > maxY) {
-                scale *= scaleMultiplier;
-                continue;
-            }
+                            float pointsX = points * poiSin;
+                            int poiX = midX - roundf(pointsX / charWidth);
+                            if (poiX < minX || poiX > maxX) {
+                                scale *= scaleMultiplier;
+                                continue;
+                            }
 
-            displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
+                            float pointsY = points * poiCos;
+                            int poiY = midY + roundf(pointsY / charHeight);
+                            if (poiY < minY || poiY > maxY) {
+                                scale *= scaleMultiplier;
+                                continue;
+                            }
 
-            // Update saved location
-            myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
-            *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
-            //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
-            break;
-        }
-		
-    }
+                            displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
+
+                            // Update saved location
+                            myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+                            *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+                            //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
+                            break;
+                        }
+                        
+                    }
+                }
 }
 
 
@@ -1666,7 +1671,7 @@ static bool osdDrawSingleElement(uint8_t item)
         
     case OSD_RADAR:
             {
-                static uint16_t drawn = 0;
+                //static uint16_t drawn = 0;
                 static uint16_t drawnPlanes = 0;
                 static uint32_t scale = 0;
 				pos_t currentPos;
@@ -1675,7 +1680,7 @@ static bool osdDrawSingleElement(uint8_t item)
 
                 //DISPLAY RADARMAP
                 if (planesInfos[0].planeWP.lat!=0){
-                    osdDrawRadarMapSimple(planesInfos,0,&drawnPlanes, &scale);
+                    osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
                 }
                // osdDrawRadar(&drawn, &scale);
     //END CAMILLe
