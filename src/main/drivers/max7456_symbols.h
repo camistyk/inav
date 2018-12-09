@@ -92,6 +92,13 @@
 #define SYM_DIRECTION  0x72
 #define SYM_PLANE_SIGHT 0x98
 #define SYM_PLANE      0xA8 
+#define SYM_PLANE_VERY_HIGH 0xA2
+#define SYM_PLANE_HIGH 0xA3
+#define SYM_PLANE_VERY_LOW 0xA5
+#define SYM_PLANE_LOW 0xA4
+#define SYM_PLUS 0x2B
+#define SYM_LESS 0x2D
+
 
 // GPS Coordinates and Altitude
 #define SYM_LAT 0xA6

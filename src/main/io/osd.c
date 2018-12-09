@@ -1059,6 +1059,8 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
     int referenceHeading=DECIDEGREES_TO_DEGREES(osdGetHeading());
     uint8_t referenceSym=0;
     int plane_id=0;
+    int32_t myAlt = osdGetAltitude();
+    int32_t relativAlt=0;;
 
     for (plane_id=0;plane_id<MAX_PLANES;plane_id++)
     {
@@ -1069,7 +1071,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection+5);
         uint8_t poiSymbol=SYM_PLANE;
         uint8_t poiSymbolPlaneSight=SYM_ARROW_UP;
-
+        relativAlt=myAlt-currentPlane.planeWP.alt;
         /* CALCULATE NEAREST PLANE ID
         *
         * */
@@ -1088,9 +1090,25 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         //END CALCULATE
         int plane_id_near=index;
 
-
+        //CHANGE SYMBOL IF HIGHER OR LOWER
         if (plane_id_near==plane_id){
             poiSymbol=SYM_PLANE_SIGHT;
+        }else{
+            if (currentPlane.planeWP.alt>myAlt){
+                if(currentPlane.planeWP.alt-myAlt>20)
+                {
+                    poiSymbol=SYM_PLANE_VERY_HIGH;
+                }else{
+                    poiSymbol=SYM_PLANE_HIGH;
+                }
+            }else{
+                 if(myAlt-currentPlane.planeWP.alt>20)
+                {
+                    poiSymbol=SYM_PLANE_VERY_LOW;
+                }else{
+                    poiSymbol=SYM_PLANE_LOW;
+                }
+            }
         }
  
         // TODO: These need to be tested with several setups. We might
@@ -1226,7 +1244,16 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
 
         //DRAW altitude of nearest plane EXPERIMENTAL
         if (plane_id_near==plane_id){
-            osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.alt, scaleUnitDivisor, maxDecimals, 2, 3);
+            if(relativAlt>0){
+                buf[0]=SYM_LESS;
+                buf[1] = '\0';
+            }else{
+                buf[0]=SYM_PLUS;
+                buf[1] = '\0';
+            }
+            displayWrite(osdDisplayPort, minX, maxY-1, buf);
+
+            osdFormatCentiNumber(buf, abs(relativAlt), scaleUnitDivisor, maxDecimals, 2, 3);
             buf[3]=SYM_ALT_M;
             buf[4] = '\0';
             displayWrite(osdDisplayPort, minX + 1, maxY-1, buf);
