@@ -70,7 +70,7 @@
 gpsLocation_t GPS_home;
 uint16_t      GPS_distanceToHome;        // distance to home point in meters
 int16_t       GPS_directionToHome;       // direction to home point in degrees
-//START CAMILLE
+//START NEWCODE
 wp_planes_t  planesInfos[MAX_PLANES];
 
 //END CAM
@@ -2133,13 +2133,13 @@ void updateHomePosition(void)
 
             /* LLH Location in NEU axis system */
 
-            //START CAMILLE
+            //START NEWCODE
 
             gpsLocation_t planeLocation;
             fpVector3_t posPlane;
 
-			//INITIALISE 5 PLANES (waypoint 100 to 105)
-			for (int i = 0; i < 4; i++) {
+			//INITIALISE 5 PLANES (Cf MAX_PLANES var) (waypoint 100 to 105 for testing)
+			for (int i = 0; i < MAX_PLANES-1; i++) {
 				planesInfos[i].planeWP.lat=0;
                 planesInfos[i].drawn=0;
 				planesInfos[i].planeWP.lon=0;
@@ -2163,7 +2163,7 @@ void updateHomePosition(void)
                 }
 
 
-            //END CAMILLE
+            //END NEWCODE
 
             posControl.homeDistance = calculateDistanceToDestination(&posControl.homePosition.pos);
             posControl.homeDirection = calculateBearingToDestination(&posControl.homePosition.pos);

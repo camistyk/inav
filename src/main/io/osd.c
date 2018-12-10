@@ -1,4 +1,4 @@
-//START CAMILLE
+//START NEWCODE
 
 /*
  * This file is part of Cleanflight.
@@ -1048,9 +1048,8 @@ static void osdDrawMap(int referenceHeading, uint8_t referenceSym, uint8_t cente
 }
 
 
-//START CAMILLE
-
-//REPLACE ORIGINAL FUNCTION (keep care it begin by static uint16 now)
+//START NEWCODE
+//REPLACE ORIGINAL FUNCTION
 
 static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t *usedScale)
 {
@@ -1069,9 +1068,12 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         //TODO : TEST FRONT VIEW EXPERIMENTAL
         //uint32_t poiDistance=planes[plane_id].GPS_altitudeToMe;
         int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection+5);
-        uint8_t poiSymbol=SYM_PLANE;
-        uint8_t poiSymbolPlaneSight=SYM_ARROW_UP;
+        //SYMBOL OF PLANES
+        uint8_t poiSymbol=SYM_PLANE; 
+        //SYMBOL OF NEAREST PLANE
+        uint8_t poiSymbolPlaneSight=SYM_ARROW_UP; 
         relativAlt=myAlt-currentPlane.planeWP.alt;
+
         /* CALCULATE NEAREST PLANE ID
         *
         * */
@@ -1090,7 +1092,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         //END CALCULATE
         int plane_id_near=index;
 
-        //CHANGE SYMBOL IF HIGHER OR LOWER
+        //CHANGE SYMBOL OF PLANE IF HIGHER OR LOWER
         if (plane_id_near==plane_id){
             poiSymbol=SYM_PLANE_SIGHT;
         }else{
@@ -1242,7 +1244,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             
         }
 
-        //DRAW altitude of nearest plane EXPERIMENTAL
+        //DRAW altitude and speed of nearest plane EXPERIMENTAL
         if (plane_id_near==plane_id){
             if(relativAlt>0){
                 buf[0]=SYM_LESS;
@@ -1251,8 +1253,10 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                 buf[0]=SYM_PLUS;
                 buf[1] = '\0';
             }
+            //Draw symbol if plane higher or lower (+ or -)
             displayWrite(osdDisplayPort, minX, maxY-1, buf);
-
+            
+            // Draw relativ altitude 
             osdFormatCentiNumber(buf, abs(relativAlt), scaleUnitDivisor, maxDecimals, 2, 3);
             buf[3]=SYM_ALT_M;
             buf[4] = '\0';
@@ -1618,7 +1622,7 @@ static bool osdDrawSingleElement(uint8_t item)
                 static uint16_t drawnPlanes = 0;
                 static uint32_t scale = 0;
                // osdDrawRadar(&drawn, &scale);
-               //START CAMILLE
+               //START NEWCODE
 
                 //DISPLAY RADARMAP
                 if (planesInfos[0].planeWP.lat!=0){
