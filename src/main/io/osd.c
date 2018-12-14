@@ -169,6 +169,7 @@ static displayPort_t *osdDisplayPort;
 
 #define AH_MAX_PITCH 200 // Specify maximum AHI pitch value displayed. Default 200 = 20.0 degrees
 #define AH_MAX_ROLL 400  // Specify maximum AHI roll value displayed. Default 400 = 40.0 degrees
+#define FV_MAX_PITCH 600
 #define AH_SYMBOL_COUNT 9
 #define AH_SIDEBAR_WIDTH_POS 7
 #define AH_SIDEBAR_HEIGHT_POS 3
@@ -1048,18 +1049,26 @@ static void osdDrawMap(int referenceHeading, uint8_t referenceSym, uint8_t cente
 }
 
 
+
+
 //START NEWCODE
+
+int map(int x, int in_min, int in_max, int out_min, int out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 //REPLACE ORIGINAL FUNCTION
 
-static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t *usedScale)
+static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t *usedScale,bool frontview)
 {
     //REMOVED CENTER SYMP
     //REMOVED BLINKING WHEN POINT OVER ME
-    int referenceHeading=DECIDEGREES_TO_DEGREES(osdGetHeading());
+    int referenceHeading=DECIDEGREES_TO_DEGREES(osdGetHeading()) - 180;
     uint8_t referenceSym=0;
     int plane_id=0;
     int32_t myAlt = osdGetAltitude();
     int32_t relativAlt=0;;
+    int pitchAngle=0;
 
     for (plane_id=0;plane_id<MAX_PLANES;plane_id++)
     {
@@ -1193,44 +1202,65 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             float poiSin = sin_approx(poiAngle);
             float poiCos = cos_approx(poiAngle);
 
-            // Now start looking for a valid scale that lets us draw everything
-            int ii;
-            for (ii = 0; ii < 50; ii++) {
-                // Calculate location of the aircraft in map
-                int points = poiDistance / ((float)scale / charHeight);
+                // Now start looking for a valid scale that lets us draw everything
+                int ii;
+                for (ii = 0; ii < 50; ii++) {
+                    // Calculate location of the aircraft in map
+                    int points = poiDistance / ((float)scale / charHeight);
 
-                float pointsX = points * poiSin;
-                int poiX = midX - roundf(pointsX / charWidth);
-                if (poiX < minX || poiX > maxX) {
-                    scale *= scaleMultiplier;
-                    continue;
-                }
-
-                float pointsY = points * poiCos;
-                int poiY = midY + roundf(pointsY / charHeight);
-                if (poiY < minY || poiY > maxY) {
-                    scale *= scaleMultiplier;
-                    continue;
-                }
-
-                uint8_t c;
-                if (displayReadCharWithAttr(osdDisplayPort, poiX, poiY, &c, NULL) && c != SYM_BLANK) {
-                    // Something else written here, increase scale. If the display doesn't support reading
-                    // back characters, we assume there's nothing.
-                    //
-                    // If we're close to the center, decrease scale. Otherwise increase it.
-                    uint8_t centerDeltaX = (maxX - minX) / (scaleMultiplier * 2);
-                    uint8_t centerDeltaY = (maxY - minY) / (scaleMultiplier * 2);
-                    if (poiX >= midX - centerDeltaX && poiX <= midX + centerDeltaX &&
-                        poiY >= midY - centerDeltaY && poiY <= midY + centerDeltaY &&
-                        scale > scaleMultiplier) {
-
-                        scale /= scaleMultiplier;
-                    } else {
+                    float pointsX = points * poiSin;
+                    int poiX = midX - roundf(pointsX / charWidth);
+                    if (poiX < minX || poiX > maxX) {
                         scale *= scaleMultiplier;
+                        continue;
                     }
-                    continue;
+
+                    float pointsY = points * poiCos;
+                    int poiY = midY + roundf(pointsY / charHeight);
+                    if (poiY < minY || poiY > maxY) {
+                        scale *= scaleMultiplier;
+                        continue;
+                    }
+
+                    uint8_t c;
+                    if (displayReadCharWithAttr(osdDisplayPort, poiX, poiY, &c, NULL) && c != SYM_BLANK) {
+                        // Something else written here, increase scale. If the display doesn't support reading
+                        // back characters, we assume there's nothing.
+                        //
+                        // If we're close to the center, decrease scale. Otherwise increase it.
+                        uint8_t centerDeltaX = (maxX - minX) / (scaleMultiplier * 2);
+                        uint8_t centerDeltaY = (maxY - minY) / (scaleMultiplier * 2);
+                        if (poiX >= midX - centerDeltaX && poiX <= midX + centerDeltaX &&
+                            poiY >= midY - centerDeltaY && poiY <= midY + centerDeltaY &&
+                            scale > scaleMultiplier) {
+
+                            scale /= scaleMultiplier;
+                        } else {
+                            scale *= scaleMultiplier;
+                        }
+                        continue;
+                    }
+
+
+                /*
+                *  FRONT VIEW take care of altitude instead of distances
+                * if to high then put plane on top, if behind put point below
+                * */
+                if (frontview){
+                    pitchAngle = constrain(attitude.values.pitch, -FV_MAX_PITCH, FV_MAX_PITCH); //-60° to +60° FOV Lens 120°
+                    int poiYFV=map(pitchAngle,-FV_MAX_PITCH,FV_MAX_PITCH,minY,maxY); //map to OSD screen
+                    poiYFV=poiYFV+relativAlt;
+                    poiYFV=constrain(poiYFV,minY,maxY);
+                    if(poiY<midY){
+                        poiY=minY;
+                    }else if(poiYFV>maxY){
+                        poiY=maxY;
+                    }else{
+                        poiY=poiYFV;
+                    }
+                    
                 }
+                    
 
 
                 displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
@@ -1246,6 +1276,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
 
         //DRAW altitude and speed of nearest plane EXPERIMENTAL
         if (plane_id_near==plane_id){
+
             if(relativAlt>0){
                 buf[0]=SYM_LESS;
                 buf[1] = '\0';
@@ -1628,7 +1659,7 @@ static bool osdDrawSingleElement(uint8_t item)
                 if (planesInfos[0].planeWP.lat!=0){
                    // osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
                     //NEXT TEST WITH BIG FUNCTION
-                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale);
+                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,true); //Last param to set frontview on or off
                 }
                 osdDrawRadar(&drawn, &scale);
                 return true;
