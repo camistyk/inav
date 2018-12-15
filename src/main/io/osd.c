@@ -1074,8 +1074,6 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
     {
         wp_planes_t currentPlane=planes[plane_id];
         uint32_t poiDistance=currentPlane.GPS_directionToMe;
-        //TODO : TEST FRONT VIEW EXPERIMENTAL
-        //uint32_t poiDistance=planes[plane_id].GPS_altitudeToMe;
         int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection+5);
         //SYMBOL OF PLANES
         uint8_t poiSymbol=SYM_PLANE; 
@@ -1248,6 +1246,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                 * */
                 if (frontview){
                     pitchAngle = constrain(attitude.values.pitch, -FV_MAX_PITCH, FV_MAX_PITCH); //-60° to +60° FOV Lens 120°
+                    pitchAngle = ((pitchAngle * 25) / FV_MAX_PITCH) - 41;
                     int poiYFV=map(pitchAngle,-FV_MAX_PITCH,FV_MAX_PITCH,minY,maxY); //map to OSD screen
                     poiYFV=poiYFV+relativAlt;
                     poiYFV=constrain(poiYFV,minY,maxY);
@@ -1299,7 +1298,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             buf[4] = '\0';
             displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
         
-            // Draw the point on the map
+            // Draw the arrow direction on the map
             int mapHeading = poiDirection;
             poiSymbolPlaneSight += mapHeading * 2 / 45;
             buf[0] = poiSymbolPlaneSight;
@@ -1661,7 +1660,7 @@ static bool osdDrawSingleElement(uint8_t item)
                     //NEXT TEST WITH BIG FUNCTION
                     osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,true); //Last param to set frontview on or off
                 }
-                osdDrawRadar(&drawn, &scale);
+               // osdDrawRadar(&drawn, &scale);
                 return true;
             }
 #endif // GPS
