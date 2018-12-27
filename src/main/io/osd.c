@@ -1076,9 +1076,9 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         uint32_t poiDistance=currentPlane.GPS_directionToMe;
         int16_t poiDirection=osdGetHeadingAngle(currentPlane.planePoiDirection+5);
         //SYMBOL OF PLANES
-        uint8_t poiSymbol=SYM_PLANE; 
+        uint8_t poiSymbol=SYM_PLANE;
         //SYMBOL OF NEAREST PLANE
-        uint8_t poiSymbolPlaneSight=SYM_ARROW_UP; 
+        uint8_t poiSymbolPlaneSight=SYM_ARROW_UP;
         relativAlt=myAlt-currentPlane.planeWP.alt;
 
         /* CALCULATE NEAREST PLANE ID
@@ -1119,7 +1119,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                 }
             }
         }
- 
+
         // TODO: These need to be tested with several setups. We might
         // need to make them configurable.
         const int hMargin = 1;
@@ -1257,9 +1257,9 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                     }else{
                         poiY=poiYFV;
                     }
-                    
+
                 }
-                    
+
 
 
                 displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
@@ -1270,7 +1270,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                 myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
                 break;
             }
-            
+
         }
 
         //DRAW altitude and speed of nearest plane EXPERIMENTAL
@@ -1285,8 +1285,8 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             }
             //Draw symbol if plane higher or lower (+ or -)
             displayWrite(osdDisplayPort, minX, maxY-1, buf);
-            
-            // Draw relativ altitude 
+
+            // Draw relativ altitude
             osdFormatCentiNumber(buf, abs(relativAlt), scaleUnitDivisor, maxDecimals, 2, 3);
             buf[3]=SYM_ALT_M;
             buf[4] = '\0';
@@ -1297,7 +1297,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             buf[3] = SYM_KMH;
             buf[4] = '\0';
             displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
-        
+
             // Draw the arrow direction on the map
             int mapHeading = poiDirection;
             poiSymbolPlaneSight += mapHeading * 2 / 45;
@@ -1645,7 +1645,7 @@ static bool osdDrawSingleElement(uint8_t item)
             osdDrawHomeMap(CENTIDEGREES_TO_DEGREES(navigationGetHomeHeading()), 'T', &drawn, &scale);
             return true;
         }
-        
+
     case OSD_RADAR:
             {
                 static uint16_t drawn = 0;
@@ -1658,7 +1658,7 @@ static bool osdDrawSingleElement(uint8_t item)
                 if (planesInfos[0].planeWP.lat!=0){
                    // osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
                     //NEXT TEST WITH BIG FUNCTION
-                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,true); //Last param to set frontview on or off
+                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,false); //Last param to set frontview on or off
                 }
                // osdDrawRadar(&drawn, &scale);
                 return true;
