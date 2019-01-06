@@ -2225,7 +2225,17 @@ static mspResult_e mspFcProcessInCommand(uint16_t cmdMSP, sbuf_t *src)
         } else
             return MSP_RESULT_ERROR;
         break;
-#endif
+
+
+//START NEW CODE
+    case MSP_SET_RADAR_NAV:
+        if (dataSize >= 2) {
+            radarSet.frontview=sbufReadU8(src);
+            radarSet.scale=sbufReadU8(src);
+        } else
+            return MSP_RESULT_ERROR;
+        break;
+    #endif
 
     case MSP_SET_FEATURE:
         if (dataSize >= 4) {
@@ -2244,6 +2254,8 @@ static mspResult_e mspFcProcessInCommand(uint16_t cmdMSP, sbuf_t *src)
         } else
             return MSP_RESULT_ERROR;
         break;
+
+
 
     case MSP_SET_VOLTAGE_METER_CONFIG:
         if (dataSize >= 4) {

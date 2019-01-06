@@ -580,6 +580,9 @@ void init(void)
 
 #ifdef USE_GPS
     if (feature(FEATURE_GPS)) {
+        //START NEWCODE
+        radarSet.frontview=false;
+        radarSet.scale=5;
         gpsInit();
         addBootlogEvent2(BOOT_EVENT_GPS_INIT_DONE, BOOT_EVENT_FLAGS_NONE);
     }

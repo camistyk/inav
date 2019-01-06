@@ -1175,7 +1175,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             case OSD_UNIT_UK:
                 FALLTHROUGH;
             case OSD_UNIT_METRIC:
-                initialScale = 10; // 10m as initial scale
+                initialScale = 5; // 10m as initial scale
                 scaleToUnit = 100; // scale to cm for osdFormatCentiNumber()
                 scaleUnitDivisor = 1000; // Convert to km when scale gets bigger than 999m
                 symUnscaled = SYM_M;
@@ -1188,10 +1188,13 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         uint32_t scale = initialScale;
         if (*usedScale) {
             scale = *usedScale;
+        }
+        /*if (*usedScale) {
+            scale = *usedScale;
             if (scale > initialScale && poiDistance < *usedScale * scaleReductionMultiplier) {
                 scale /= scaleMultiplier;
             }
-        }
+        }*/
 
         if (STATE(GPS_FIX)) {
 
@@ -1201,6 +1204,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             float poiCos = cos_approx(poiAngle);
 
                 // Now start looking for a valid scale that lets us draw everything
+                
                 int ii;
                 for (ii = 0; ii < 50; ii++) {
                     // Calculate location of the aircraft in map
@@ -1208,20 +1212,20 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
 
                     float pointsX = points * poiSin;
                     int poiX = midX - roundf(pointsX / charWidth);
-                    if (poiX < minX || poiX > maxX) {
+                    /*if (poiX < minX || poiX > maxX) {
                         scale *= scaleMultiplier;
                         continue;
-                    }
+                    }*/
 
                     float pointsY = points * poiCos;
                     int poiY = midY + roundf(pointsY / charHeight);
-                    if (poiY < minY || poiY > maxY) {
+                   /* if (poiY < minY || poiY > maxY) {
                         scale *= scaleMultiplier;
                         continue;
-                    }
+                    }*/
 
                     uint8_t c;
-                    if (displayReadCharWithAttr(osdDisplayPort, poiX, poiY, &c, NULL) && c != SYM_BLANK) {
+                   /* if (displayReadCharWithAttr(osdDisplayPort, poiX, poiY, &c, NULL) && c != SYM_BLANK) {
                         // Something else written here, increase scale. If the display doesn't support reading
                         // back characters, we assume there's nothing.
                         //
@@ -1237,7 +1241,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                             scale *= scaleMultiplier;
                         }
                         continue;
-                    }
+                    }*/
 
 
                 /*
@@ -1261,6 +1265,18 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                 }
 
 
+                if (poiX>maxX-1){
+                    poiX=maxX-1;
+                }
+                if (poiX<minX+1){
+                    poiX=minX+1;
+                }
+                if (poiY>maxY-1){
+                    poiY=maxY-1;
+                }
+                if (poiY<minY+1){
+                    poiY=minY+1;
+                }
 
                 displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
 
@@ -1650,15 +1666,22 @@ static bool osdDrawSingleElement(uint8_t item)
             {
                 static uint16_t drawn = 0;
                 static uint16_t drawnPlanes = 0;
-                static uint32_t scale = 0;
-               // osdDrawRadar(&drawn, &scale);
+                static uint32_t scale = 5;
+                static frontview=false;
                //START NEWCODE
+               
+                // ENABLE frontview if send by MSP else false
+                if (radarSet.frontview){
+                    frontview=true;
+                }
 
+               // osdDrawRadar(&drawn, &scale);
+               // GET SCALE FROM MSP else 5 meters
+                scale=radarSet.scale;
+                
                 //DISPLAY RADARMAP
                 if (planesInfos[0].planeWP.lat!=0){
-                   // osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
-                    //NEXT TEST WITH BIG FUNCTION
-                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,false); //Last param to set frontview on or off
+                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,frontview);
                 }
                // osdDrawRadar(&drawn, &scale);
                 return true;
