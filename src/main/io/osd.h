@@ -35,14 +35,6 @@
 #define OSD_POS_MAX         0x3FF
 #define OSD_POS_MAX_CLI     (OSD_POS_MAX | OSD_VISIBLE_FLAG)
 
-//START NEWCODE
-//SETUP PARAMETER FOR INAV RADAR
-typedef struct inav_radar_setup_s  {
-    bool frontview;
-    int8_t scale;
-} inav_radar_setup_t;
-
-extern inav_radar_setup_t radarSet;
 
 typedef enum {
     OSD_RSSI_VALUE,

@@ -1371,10 +1371,6 @@ groups:
         field: fw.launch_throttle
         min: 1000
         max: 2000
-      - name: nav_radar_scale
-        field: fw.nav_radar_scale
-        min : 1
-        max : 50
       - name: nav_fw_launch_idle_thr
         field: fw.launch_idle_throttle
         min: 1000

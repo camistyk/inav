@@ -324,7 +324,7 @@
 #define MSP_SET_4WAY_IF          245    //in message          Sets 4way interface
 #define MSP_RTC                  246    //out message         Gets the RTC clock (returns: secs(i32) millis(u16) - (0,0) if time is not known)
 #define MSP_SET_RTC              247    //in message          Sets the RTC clock (args: secs(i32) millis(u16))
-#define MSP_SET_RADAR_NAV        248    //SET inav Radar options
+
 // MSPv2 includes
 #include "msp_protocol_v2_common.h"
 #include "msp_protocol_v2_sensor.h"

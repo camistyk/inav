@@ -70,7 +70,7 @@
 gpsLocation_t GPS_home;
 uint16_t      GPS_distanceToHome;        // distance to home point in meters
 int16_t       GPS_directionToHome;       // direction to home point in degrees
-//START NEWCODE
+//START CAMILLE
 wp_planes_t  planesInfos[MAX_PLANES];
 
 //END CAM
@@ -144,7 +144,6 @@ PG_RESET_TEMPLATE(navConfig_t, navConfig,
         .launch_accel_thresh = 1.9f * 981,     // cm/s/s (1.9*G)
         .launch_time_thresh = 40,              // 40ms
         .launch_throttle = 1700,
-        .nav_radar_scale = 5,
         .launch_idle_throttle = 1000,          // Motor idle or MOTOR_STOP
         .launch_motor_timer = 500,             // ms
         .launch_motor_spinup_time = 100,       // ms, time to gredually increase throttle from idle to launch
@@ -2134,13 +2133,13 @@ void updateHomePosition(void)
 
             /* LLH Location in NEU axis system */
 
-            //START NEWCODE
+            //START CAMILLE
 
             gpsLocation_t planeLocation;
             fpVector3_t posPlane;
 
-			//INITIALISE 5 PLANES (Cf MAX_PLANES var) (waypoint 100 to 105 for testing)
-			for (int i = 0; i < MAX_PLANES-1; i++) {
+			//INITIALISE 5 PLANES (waypoint 100 to 105)
+			for (int i = 0; i < 4; i++) {
 				planesInfos[i].planeWP.lat=0;
                 planesInfos[i].drawn=0;
 				planesInfos[i].planeWP.lon=0;
@@ -2164,7 +2163,7 @@ void updateHomePosition(void)
                 }
 
 
-            //END NEWCODE
+            //END CAMILLE
 
             posControl.homeDistance = calculateDistanceToDestination(&posControl.homePosition.pos);
             posControl.homeDirection = calculateBearingToDestination(&posControl.homePosition.pos);

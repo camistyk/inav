@@ -112,7 +112,7 @@
 #endif
 
 extern timeDelta_t cycleTime; // FIXME dependency on mw.c
-inav_radar_setup_t radarSet;
+
 static const char * const flightControllerIdentifier = INAV_IDENTIFIER; // 4 UPPER CASE alpha numeric characters that identify the flight controller.
 static const char * const boardIdentifier = TARGET_BOARD_IDENTIFIER;
 
@@ -2225,17 +2225,7 @@ static mspResult_e mspFcProcessInCommand(uint16_t cmdMSP, sbuf_t *src)
         } else
             return MSP_RESULT_ERROR;
         break;
-
-
-//START NEW CODE
-    case MSP_SET_RADAR_NAV:
-        if (dataSize >= 2) {
-            radarSet.frontview=sbufReadU8(src);
-            radarSet.scale=sbufReadU8(src);
-        } else
-            return MSP_RESULT_ERROR;
-        break;
-    #endif
+#endif
 
     case MSP_SET_FEATURE:
         if (dataSize >= 4) {
@@ -2254,8 +2244,6 @@ static mspResult_e mspFcProcessInCommand(uint16_t cmdMSP, sbuf_t *src)
         } else
             return MSP_RESULT_ERROR;
         break;
-
-
 
     case MSP_SET_VOLTAGE_METER_CONFIG:
         if (dataSize >= 4) {
