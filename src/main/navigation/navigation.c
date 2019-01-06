@@ -144,6 +144,7 @@ PG_RESET_TEMPLATE(navConfig_t, navConfig,
         .launch_accel_thresh = 1.9f * 981,     // cm/s/s (1.9*G)
         .launch_time_thresh = 40,              // 40ms
         .launch_throttle = 1700,
+        .nav_radar_scale = 5,
         .launch_idle_throttle = 1000,          // Motor idle or MOTOR_STOP
         .launch_motor_timer = 500,             // ms
         .launch_motor_spinup_time = 100,       // ms, time to gredually increase throttle from idle to launch

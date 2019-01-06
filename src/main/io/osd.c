@@ -1264,7 +1264,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
 
                 }
 
-
+if (!frontview){
                 if (poiX>maxX-1){
                     poiX=maxX-1;
                 }
@@ -1277,7 +1277,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                 if (poiY<minY+1){
                     poiY=minY+1;
                 }
-
+}
                 displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
 
                 // Update saved location
@@ -1319,6 +1319,13 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             poiSymbolPlaneSight += mapHeading * 2 / 45;
             buf[0] = poiSymbolPlaneSight;
             displayWrite(osdDisplayPort, minX , maxY-2, buf);
+
+            // Draw the used scale
+            bool scaled = osdFormatCentiNumber(buf, scale * scaleToUnit, scaleUnitDivisor, maxDecimals, 2, 3);
+            buf[3] = scaled ? symScaled : symUnscaled;
+            buf[4] = '\0';
+            displayWrite(osdDisplayPort, minX + 1, maxY-4, buf);
+            *usedScale = scale;
         }
 
     }
@@ -1649,10 +1656,21 @@ static bool osdDrawSingleElement(uint8_t item)
 
     case OSD_MAP_NORTH:
         {
-            static uint16_t drawn = 0;
+          /*  static uint16_t drawn = 0;
             static uint32_t scale = 0;
             osdDrawHomeMap(0, 'N', &drawn, &scale);
-            return true;
+            return true;*/
+
+                //START NEW
+               static uint16_t drawn = 0;
+                static uint16_t drawnPlanes = 0;
+                static uint32_t scale = 5;
+               //START NEWCODE
+                //DISPLAY RADARMAP
+                if (planesInfos[0].planeWP.lat!=0){
+                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,true);
+                }
+                return true;
         }
     case OSD_MAP_TAKEOFF:
         {
@@ -1670,18 +1688,22 @@ static bool osdDrawSingleElement(uint8_t item)
                 static frontview=false;
                //START NEWCODE
                
-                // ENABLE frontview if send by MSP else false
+               //NEW MSP COMMAND FOR TEST
+               /*
                 if (radarSet.frontview){
                     frontview=true;
-                }
+                }*/
 
                // osdDrawRadar(&drawn, &scale);
                // GET SCALE FROM MSP else 5 meters
-                scale=radarSet.scale;
+                //scale=radarSet.scale;
+
+                scale=navConfig()->fw.nav_radar_scale;
+                
                 
                 //DISPLAY RADARMAP
                 if (planesInfos[0].planeWP.lat!=0){
-                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,frontview);
+                    osdDrawRadarMap(planesInfos,&drawnPlanes, &scale,false);
                 }
                // osdDrawRadar(&drawn, &scale);
                 return true;
