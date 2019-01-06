@@ -42,8 +42,7 @@ typedef struct inav_radar_setup_s  {
     int8_t scale;
 } inav_radar_setup_t;
 
-inav_radar_setup_t radarSet;
-
+extern inav_radar_setup_t radarSet;
 
 typedef enum {
     OSD_RSSI_VALUE,
