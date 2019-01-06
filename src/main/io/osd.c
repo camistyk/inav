@@ -129,7 +129,7 @@
 static unsigned currentLayout = 0;
 static int layoutOverride = -1;
 
-
+inav_radar_setup_t radarSet;
 uint16_t myDrawn[MAX_PLANES];
 
 

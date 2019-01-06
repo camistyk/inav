@@ -139,6 +139,7 @@ extern void initialisePreBootHardware(void);
 #endif
 
 extern uint8_t motorControlEnable;
+inav_radar_setup_t radarSet;
 
 typedef enum {
     SYSTEM_STATE_INITIALISING   = 0,
