@@ -198,6 +198,7 @@ typedef struct navConfig_s {
         uint16_t launch_time_thresh;         // Time threshold for launch detection (ms)
         uint16_t launch_idle_throttle;       // Throttle to keep at launch idle
         uint16_t launch_throttle;            // Launch throttle
+        uint16_t nav_radar_scale;            // defined scale for radar map
         uint16_t launch_motor_timer;         // Time to wait before setting launch_throttle (ms)
         uint16_t launch_motor_spinup_time;   // Time to speed-up motors from idle to launch_throttle (ESC desync prevention)
         uint16_t launch_min_time;	     // Minimum time in launch mode to prevent possible bump of the sticks from leaving launch mode early
