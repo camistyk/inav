@@ -1447,9 +1447,16 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
                 int posAltiY=constrain(relativAlt/scale,minY,maxY); //convert altitude with scale in meter and constrain to screen size
                 int posFvY=mapValues(posPitchY+posAltiY,minY*2,maxY*2,minY,maxY); // add altitude to pitch and map to screen
 
-                if (poiY>midY){ //if plane is behind you, hide it!
-                    displayWriteChar(osdDisplayPort, poiX, posFvY, poiSymbol);
+                //if plane is behind you draw it on the middle right or left edge
+                if (poiY<midY){
+                    posFY=midY;
+                    if (poiX>midX){
+                        poiX=maxX;
+                    }else{
+                        poiX=minX;
+                    }
                 }
+                displayWriteChar(osdDisplayPort, poiX, posFvY, poiSymbol);
 
                 // Update saved location
                 *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
