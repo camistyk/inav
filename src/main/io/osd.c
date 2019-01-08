@@ -180,7 +180,7 @@ static float mapValues(int x, int x1, int x2, int y1,  int y2)
 {
   int m = (y2 - y1) / (x2 - x1);
   int c = y1 - m * x1; // point of interest: c is also equal to y2 - m * x2, though float math might lead to slightly different results.
- 
+
   return m * x + c;
 }
 
@@ -1120,7 +1120,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                 }
             }
         }
- 
+
         // TODO: These need to be tested with several setups. We might
         // need to make them configurable.
         const int hMargin = 1;
@@ -1255,7 +1255,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                 myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
                 break;
             }
-            
+
         }
 
         //DRAW altitude of nearest plane EXPERIMENTAL
@@ -1279,7 +1279,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
             buf[3] = SYM_KMH;
             buf[4] = '\0';
             displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
-        
+
             // Draw the point on the map
             int mapHeading = poiDirection;
             poiSymbolPlaneSight += mapHeading * 2 / 45;
@@ -1356,7 +1356,7 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
                 }
             }
         }
- 
+
         // TODO: These need to be tested with several setups. We might
         // need to make them configurable.
         const int hMargin = 1;
@@ -1440,7 +1440,7 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
                 //constrain to get plane on map if too far
                 poiX=constrain(poiX,minX+3,maxX-3);
                 poiY=constrain(poiY,minY+3,maxY-3);
-                
+
                 int pitchAngle = constrain(attitude.values.pitch, -350, 350); //MAX pitch to 35°
 
                 int posPitchY=mapValues(pitchAngle,-350,350,minY,maxY); //map pitch to max screen size
@@ -1449,7 +1449,7 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
 
                 //if plane is behind you draw it on the middle right or left edge
                 if (poiY<midY){
-                    posFY=midY;
+                    posFvY=midY;
                     if (poiX>midX){
                         poiX=maxX;
                     }else{
@@ -1464,7 +1464,7 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
                 myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
                 break;
             }
-            
+
         }
 
         //DRAW altitude of nearest plane EXPERIMENTAL
@@ -1488,7 +1488,7 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
             buf[3] = SYM_KMH;
             buf[4] = '\0';
             displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
-        
+
             // Draw the point on the map
             int mapHeading = poiDirection;
             poiSymbolPlaneSight += mapHeading * 2 / 45;
@@ -1848,18 +1848,18 @@ static bool osdDrawSingleElement(uint8_t item)
                 if ( navConfig()->fw.nav_radar_scale>0){
                     scale=navConfig()->fw.nav_radar_scale;
                 }
- 
+
                 //DISPLAY FrontViewMap
                 if (planesInfos[0].planeWP.lat!=0){
                     osdDrawFrontView(planesInfos,&drawnPlanes, &scale);
                 }
                 osdDrawRadar(&drawn, &scale);
 
-           
+
 
             return true;
         }
-        
+
     case OSD_RADAR:
             {
                 static uint16_t drawn = 0;
