@@ -2147,19 +2147,24 @@ void updateHomePosition(void)
 				planesInfos[i].planeWP.alt=0;
 			}
 
+
             int y=0; // plane array init
             for (int i = 1; i < MAX_PLANES+1; i++) { //store waypoint 1 to 5
-                    getWaypoint(i,&planesInfos[y].planeWP); //load waypoint informations
-                    planesInfos[y].wp_nb=i; //store wp number
+            
+                    if ( (posControl.waypointList[i - 1]).p3==1 ) 
+                    {
+                            getWaypoint(i,&planesInfos[y].planeWP); //load waypoint informations
+                            planesInfos[y].wp_nb=i; //store wp number
 
-                    //Create gpsLocation_t in order to Convert to POS vector with  geoConvertGeodeticToLocal
-                    planeLocation.lat=planesInfos[y].planeWP.lat;
-                    planeLocation.lon=planesInfos[y].planeWP.lon;
-                    planeLocation.alt=planesInfos[y].planeWP.alt;
-                    geoConvertGeodeticToLocal(&posControl.gpsOrigin, &planeLocation, &posPlane, GEO_ALT_ABSOLUTE);
-                    planesInfos[y].GPS_directionToMe= calculateDistanceToDestination(&posPlane);
-                    planesInfos[y].planePoiDirection=calculateDistanceToDestination(&posPlane);
-                    planesInfos[y].GPS_altitudeToMe=calculateAltitudeToMe(&posPlane);
+                            //Create gpsLocation_t in order to Convert to POS vector with  geoConvertGeodeticToLocal
+                            planeLocation.lat=planesInfos[y].planeWP.lat;
+                            planeLocation.lon=planesInfos[y].planeWP.lon;
+                            planeLocation.alt=planesInfos[y].planeWP.alt;
+                            geoConvertGeodeticToLocal(&posControl.gpsOrigin, &planeLocation, &posPlane, GEO_ALT_ABSOLUTE);
+                            planesInfos[y].GPS_directionToMe= calculateDistanceToDestination(&posPlane);
+                            planesInfos[y].planePoiDirection=calculateDistanceToDestination(&posPlane);
+                            planesInfos[y].GPS_altitudeToMe=calculateAltitudeToMe(&posPlane);
+                    }
 					y++;
                 }
 
@@ -2405,6 +2410,7 @@ void resetGCSFlags(void)
     posControl.flags.isGCSAssistedNavigationReset = false;
     posControl.flags.isGCSAssistedNavigationEnabled = false;
 }
+
 
 void getWaypoint(uint8_t wpNumber, navWaypoint_t * wpData)
 {
