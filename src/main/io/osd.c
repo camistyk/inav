@@ -1084,210 +1084,213 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
         int min,index,c;
         min = currentPlane.GPS_directionToMe;
         index = 0;
+        //DISPLAY IF PLANE POWER ON (1== ON  and 2 == OFF)
+        if (currentPlane.planeWP.p3==1){
 
-        for (c = 0; c < MAX_PLANES; c++) {
-            if ((planes[c].GPS_directionToMe!=0) &&  (c!=plane_id)){
-                    if (planes[c].GPS_directionToMe < min) {
-                    index = c;
-                    min = planes[c].GPS_directionToMe;
+                for (c = 0; c < MAX_PLANES; c++) {
+                    if ((planes[c].GPS_directionToMe!=0) &&  (c!=plane_id)){
+                            if (planes[c].GPS_directionToMe < min) {
+                            index = c;
+                            min = planes[c].GPS_directionToMe;
+                            }
                     }
-            }
-        }
-        //END CALCULATE
-        int plane_id_near=index;
-
-        //CHANGE SYMBOL IF HIGHER OR LOWER
-        if (plane_id_near==plane_id){
-            poiSymbol=SYM_PLANE_SIGHT;
-        }else{
-            if (currentPlane.planeWP.alt>myAlt){
-                if(currentPlane.planeWP.alt-myAlt>20)
-                {
-                    poiSymbol=SYM_PLANE_VERY_HIGH;
-                }else{
-                    poiSymbol=SYM_PLANE_HIGH;
                 }
-            }else{
-                 if(myAlt-currentPlane.planeWP.alt>20)
-                {
-                    poiSymbol=SYM_PLANE_VERY_LOW;
+                //END CALCULATE
+                int plane_id_near=index;
+
+                //CHANGE SYMBOL IF HIGHER OR LOWER
+                if (plane_id_near==plane_id){
+                    poiSymbol=SYM_PLANE_SIGHT;
                 }else{
-                    poiSymbol=SYM_PLANE_LOW;
-                }
-            }
-        }
- 
-        // TODO: These need to be tested with several setups. We might
-        // need to make them configurable.
-        const int hMargin = 1;
-        const int vMargin = 1;
-
-        // TODO: Get this from the display driver?
-        const int charWidth = 12;
-        const int charHeight = 18;
-
-        char buf[16];
-
-        uint8_t minX = hMargin;
-        uint8_t maxX = osdDisplayPort->cols - 1 - hMargin;
-        uint8_t minY = vMargin;
-        uint8_t maxY = osdDisplayPort->rows - 1 - vMargin;
-        uint8_t midX = osdDisplayPort->cols / 2;
-        uint8_t midY = osdDisplayPort->rows / 2;
-
-        // Fixed marks
-        /*
-        if (referenceSym) {
-            displayWriteChar(osdDisplayPort, maxX, minY, SYM_DIRECTION);
-            displayWriteChar(osdDisplayPort, maxX, minY + 1, referenceSym);
-        }
-        displayWriteChar(osdDisplayPort, minX, maxY, SYM_SCALE);
-*/
-
-        //if (OSD_VISIBLE(currentPlane.drawn)) {
-        displayWriteChar(osdDisplayPort, OSD_X(myDrawn[plane_id]), OSD_Y(myDrawn[plane_id]), SYM_BLANK);
-        // *drawn = 0;
-    // }
-
-
-
-        uint32_t initialScale;
-        float scaleToUnit;
-        int scaleUnitDivisor;
-        char symUnscaled;
-        char symScaled;
-        int maxDecimals;
-        const unsigned scaleMultiplier = 2;
-        // We try to reduce the scale when the POI will be around half the distance
-        // between the center and the closers map edge, to avoid too much jumping
-        const int scaleReductionMultiplier = MIN(midX - hMargin, midY - vMargin) / 2;
-
-        switch (osdConfig()->units) {
-            case OSD_UNIT_IMPERIAL:
-                initialScale = 16; // 16m ~= 0.01miles
-                scaleToUnit = 100 / 1609.3440f; // scale to 0.01mi for osdFormatCentiNumber()
-                scaleUnitDivisor = 0;
-                symUnscaled = SYM_MI;
-                symScaled = SYM_MI;
-                maxDecimals = 2;
-                break;
-            case OSD_UNIT_UK:
-                FALLTHROUGH;
-            case OSD_UNIT_METRIC:
-                initialScale = 10; // 10m as initial scale
-                scaleToUnit = 100; // scale to cm for osdFormatCentiNumber()
-                scaleUnitDivisor = 1000; // Convert to km when scale gets bigger than 999m
-                symUnscaled = SYM_M;
-                symScaled = SYM_KM;
-                maxDecimals = 0;
-                break;
-        }
-
-        // Try to keep the same scale when getting closer until we draw over the center point
-        uint32_t scale = initialScale;
-        if (*usedScale) {
-            scale = *usedScale;
-            /*if (scale > initialScale && poiDistance < *usedScale * scaleReductionMultiplier) {
-                scale /= scaleMultiplier;
-            }*/
-        }
-
-        if (STATE(GPS_FIX)) {
-
-            int directionToPoi = osdGetHeadingAngle(poiDirection - referenceHeading);
-            float poiAngle = DEGREES_TO_RADIANS(directionToPoi);
-            float poiSin = sin_approx(poiAngle);
-            float poiCos = cos_approx(poiAngle);
-
-            // Now start looking for a valid scale that lets us draw everything
-            int ii;
-            for (ii = 0; ii < 50; ii++) {
-                // Calculate location of the aircraft in map
-                int points = poiDistance / ((float)scale / charHeight);
-
-                float pointsX = points * poiSin;
-                int poiX = midX - roundf(pointsX / charWidth);
-               /* if (poiX < minX || poiX > maxX) {
-                    scale *= scaleMultiplier;
-                    continue;
-                }*/
-
-                float pointsY = points * poiCos;
-                int poiY = midY + roundf(pointsY / charHeight);
-                /*if (poiY < minY || poiY > maxY) {
-                    scale *= scaleMultiplier;
-                    continue;
-                }*/
-
-                uint8_t c;
-                /*
-                if (displayReadCharWithAttr(osdDisplayPort, poiX, poiY, &c, NULL) && c != SYM_BLANK) {
-                    // Something else written here, increase scale. If the display doesn't support reading
-                    // back characters, we assume there's nothing.
-                    //
-                    // If we're close to the center, decrease scale. Otherwise increase it.
-                    uint8_t centerDeltaX = (maxX - minX) / (scaleMultiplier * 2);
-                    uint8_t centerDeltaY = (maxY - minY) / (scaleMultiplier * 2);
-                    if (poiX >= midX - centerDeltaX && poiX <= midX + centerDeltaX &&
-                        poiY >= midY - centerDeltaY && poiY <= midY + centerDeltaY &&
-                        scale > scaleMultiplier) {
-
-                        scale /= scaleMultiplier;
-                    } else {
-                        scale *= scaleMultiplier;
+                    if (currentPlane.planeWP.alt>myAlt){
+                        if(currentPlane.planeWP.alt-myAlt>20)
+                        {
+                            poiSymbol=SYM_PLANE_VERY_HIGH;
+                        }else{
+                            poiSymbol=SYM_PLANE_HIGH;
+                        }
+                    }else{
+                        if(myAlt-currentPlane.planeWP.alt>20)
+                        {
+                            poiSymbol=SYM_PLANE_VERY_LOW;
+                        }else{
+                            poiSymbol=SYM_PLANE_LOW;
+                        }
                     }
-                    continue;
-                }*/
-
-                //constrain to get plane on map if too far
-                poiX=constrain(poiX,minX+3,maxX-3);
-                poiY=constrain(poiY,minY+3,maxY-3);
-
-                displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
-
-                // Update saved location
-                *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
-                //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
-                myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
-                break;
-            }
-            
-        }
-
-        //DRAW altitude of nearest plane EXPERIMENTAL
-        if (plane_id_near==plane_id){
-            if(relativAlt>0){
-                buf[0]=SYM_LESS;
-                buf[1] = '\0';
-            }else{
-                buf[0]=SYM_PLUS;
-                buf[1] = '\0';
-            }
-            displayWrite(osdDisplayPort, minX, maxY-1, buf);
-
-            osdFormatCentiNumber(buf, abs(relativAlt), scaleUnitDivisor, maxDecimals, 2, 3);
-            buf[3]=SYM_ALT_M;
-            buf[4] = '\0';
-            displayWrite(osdDisplayPort, minX + 1, maxY-1, buf);
-
-            //DRAW SPEED PLANE NEAREST PLANE
-            osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.p1, scaleUnitDivisor, maxDecimals, 2, 3);
-            buf[3] = SYM_KMH;
-            buf[4] = '\0';
-            displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
+                }
         
-            // Draw the point on the map
-            int mapHeading = poiDirection;
-            poiSymbolPlaneSight += mapHeading * 2 / 45;
-            buf[0] = poiSymbolPlaneSight;
-            displayWrite(osdDisplayPort, minX , maxY-2, buf);
-        }
-            // Draw the used scale
-            bool scaled = osdFormatCentiNumber(buf, scale * scaleToUnit, scaleUnitDivisor, maxDecimals, 2, 3);
-            buf[3] = scaled ? symScaled : symUnscaled;
-            buf[4] = '\0';
-            displayWrite(osdDisplayPort, minX + 1, maxY, buf);
+                // TODO: These need to be tested with several setups. We might
+                // need to make them configurable.
+                const int hMargin = 1;
+                const int vMargin = 1;
 
+                // TODO: Get this from the display driver?
+                const int charWidth = 12;
+                const int charHeight = 18;
+
+                char buf[16];
+
+                uint8_t minX = hMargin;
+                uint8_t maxX = osdDisplayPort->cols - 1 - hMargin;
+                uint8_t minY = vMargin;
+                uint8_t maxY = osdDisplayPort->rows - 1 - vMargin;
+                uint8_t midX = osdDisplayPort->cols / 2;
+                uint8_t midY = osdDisplayPort->rows / 2;
+
+                // Fixed marks
+                /*
+                if (referenceSym) {
+                    displayWriteChar(osdDisplayPort, maxX, minY, SYM_DIRECTION);
+                    displayWriteChar(osdDisplayPort, maxX, minY + 1, referenceSym);
+                }
+                displayWriteChar(osdDisplayPort, minX, maxY, SYM_SCALE);
+        */
+
+                //if (OSD_VISIBLE(currentPlane.drawn)) {
+                displayWriteChar(osdDisplayPort, OSD_X(myDrawn[plane_id]), OSD_Y(myDrawn[plane_id]), SYM_BLANK);
+                // *drawn = 0;
+            // }
+
+
+
+                uint32_t initialScale;
+                float scaleToUnit;
+                int scaleUnitDivisor;
+                char symUnscaled;
+                char symScaled;
+                int maxDecimals;
+                const unsigned scaleMultiplier = 2;
+                // We try to reduce the scale when the POI will be around half the distance
+                // between the center and the closers map edge, to avoid too much jumping
+                const int scaleReductionMultiplier = MIN(midX - hMargin, midY - vMargin) / 2;
+
+                switch (osdConfig()->units) {
+                    case OSD_UNIT_IMPERIAL:
+                        initialScale = 16; // 16m ~= 0.01miles
+                        scaleToUnit = 100 / 1609.3440f; // scale to 0.01mi for osdFormatCentiNumber()
+                        scaleUnitDivisor = 0;
+                        symUnscaled = SYM_MI;
+                        symScaled = SYM_MI;
+                        maxDecimals = 2;
+                        break;
+                    case OSD_UNIT_UK:
+                        FALLTHROUGH;
+                    case OSD_UNIT_METRIC:
+                        initialScale = 10; // 10m as initial scale
+                        scaleToUnit = 100; // scale to cm for osdFormatCentiNumber()
+                        scaleUnitDivisor = 1000; // Convert to km when scale gets bigger than 999m
+                        symUnscaled = SYM_M;
+                        symScaled = SYM_KM;
+                        maxDecimals = 0;
+                        break;
+                }
+
+                // Try to keep the same scale when getting closer until we draw over the center point
+                uint32_t scale = initialScale;
+                if (*usedScale) {
+                    scale = *usedScale;
+                    /*if (scale > initialScale && poiDistance < *usedScale * scaleReductionMultiplier) {
+                        scale /= scaleMultiplier;
+                    }*/
+                }
+
+                if (STATE(GPS_FIX)) {
+
+                    int directionToPoi = osdGetHeadingAngle(poiDirection - referenceHeading);
+                    float poiAngle = DEGREES_TO_RADIANS(directionToPoi);
+                    float poiSin = sin_approx(poiAngle);
+                    float poiCos = cos_approx(poiAngle);
+
+                    // Now start looking for a valid scale that lets us draw everything
+                    int ii;
+                    for (ii = 0; ii < 50; ii++) {
+                        // Calculate location of the aircraft in map
+                        int points = poiDistance / ((float)scale / charHeight);
+
+                        float pointsX = points * poiSin;
+                        int poiX = midX - roundf(pointsX / charWidth);
+                    /* if (poiX < minX || poiX > maxX) {
+                            scale *= scaleMultiplier;
+                            continue;
+                        }*/
+
+                        float pointsY = points * poiCos;
+                        int poiY = midY + roundf(pointsY / charHeight);
+                        /*if (poiY < minY || poiY > maxY) {
+                            scale *= scaleMultiplier;
+                            continue;
+                        }*/
+
+                        uint8_t c;
+                        /*
+                        if (displayReadCharWithAttr(osdDisplayPort, poiX, poiY, &c, NULL) && c != SYM_BLANK) {
+                            // Something else written here, increase scale. If the display doesn't support reading
+                            // back characters, we assume there's nothing.
+                            //
+                            // If we're close to the center, decrease scale. Otherwise increase it.
+                            uint8_t centerDeltaX = (maxX - minX) / (scaleMultiplier * 2);
+                            uint8_t centerDeltaY = (maxY - minY) / (scaleMultiplier * 2);
+                            if (poiX >= midX - centerDeltaX && poiX <= midX + centerDeltaX &&
+                                poiY >= midY - centerDeltaY && poiY <= midY + centerDeltaY &&
+                                scale > scaleMultiplier) {
+
+                                scale /= scaleMultiplier;
+                            } else {
+                                scale *= scaleMultiplier;
+                            }
+                            continue;
+                        }*/
+
+                        //constrain to get plane on map if too far
+                        poiX=constrain(poiX,minX+3,maxX-3);
+                        poiY=constrain(poiY,minY+3,maxY-3);
+
+                        displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
+
+                        // Update saved location
+                        *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+                        //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
+                        myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+                        break;
+                    }
+                    
+                }
+
+                //DRAW altitude of nearest plane EXPERIMENTAL
+                if (plane_id_near==plane_id){
+                    if(relativAlt>0){
+                        buf[0]=SYM_LESS;
+                        buf[1] = '\0';
+                    }else{
+                        buf[0]=SYM_PLUS;
+                        buf[1] = '\0';
+                    }
+                    displayWrite(osdDisplayPort, minX, maxY-1, buf);
+
+                    osdFormatCentiNumber(buf, abs(relativAlt), scaleUnitDivisor, maxDecimals, 2, 3);
+                    buf[3]=SYM_ALT_M;
+                    buf[4] = '\0';
+                    displayWrite(osdDisplayPort, minX + 1, maxY-1, buf);
+
+                    //DRAW SPEED PLANE NEAREST PLANE
+                    osdFormatCentiNumber(buf, planes[plane_id_near].planeWP.p1, scaleUnitDivisor, maxDecimals, 2, 3);
+                    buf[3] = SYM_KMH;
+                    buf[4] = '\0';
+                    displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
+                
+                    // Draw the point on the map
+                    int mapHeading = poiDirection;
+                    poiSymbolPlaneSight += mapHeading * 2 / 45;
+                    buf[0] = poiSymbolPlaneSight;
+                    displayWrite(osdDisplayPort, minX , maxY-2, buf);
+                }
+                    // Draw the used scale
+                    bool scaled = osdFormatCentiNumber(buf, scale * scaleToUnit, scaleUnitDivisor, maxDecimals, 2, 3);
+                    buf[3] = scaled ? symScaled : symUnscaled;
+                    buf[4] = '\0';
+                    displayWrite(osdDisplayPort, minX + 1, maxY, buf);
+
+            }
     }
 }
 
@@ -1319,6 +1322,7 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
         int min,index,c;
         min = currentPlane.GPS_directionToMe;
         index = 0;
+if (currentPlane.planeWP.p3==1){
 
         for (c = 0; c < MAX_PLANES; c++) {
             if ((planes[c].GPS_directionToMe!=0) &&  (c!=plane_id)){
@@ -1491,7 +1495,7 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
                     pitchAngle = constrain(attitude.values.pitch, -600, 600); //-60° to +60° FOV Lens 120°
                     pitchAngle = ((pitchAngle * 25) / 600) - 41;
                     int poiYFV=map(pitchAngle,-600,600,minY,maxY); //map to OSD screen 60° for 120°FOV/2
-                    poiYFV=poiYFV+relativAlt;
+                    poiYFV=poiYFV+(relativAlt/scale);
                     poiYFV=constrain(poiYFV,minY,maxY);
 
                 //if plane is behind you draw it on the middle right or left edge
@@ -1548,6 +1552,7 @@ static void osdDrawFrontView(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_
             buf[4] = '\0';
             displayWrite(osdDisplayPort, minX + 1, maxY, buf);
 
+    }
     }
 }
 
@@ -1898,9 +1903,9 @@ static bool osdDrawSingleElement(uint8_t item)
                 }
  
                 //DISPLAY FrontViewMap
-                if (planesInfos[0].planeWP.lat!=0){
+
                     osdDrawFrontView(planesInfos,&drawnPlanes, &scale);
-                }
+                
                 osdDrawRadar(&drawn, &scale);
 
            
@@ -1921,11 +1926,11 @@ static bool osdDrawSingleElement(uint8_t item)
                //START CAMILLE
 
                 //DISPLAY RADARMAP
-                if (planesInfos[0].planeWP.lat!=0){
+
                    // osdDrawRadarMapSimple(planesInfos,&drawnPlanes, &scale);
                     //NEXT TEST WITH BIG FUNCTION
                     osdDrawRadarMap(planesInfos,&drawnPlanes, &scale);
-                }
+                
                 osdDrawRadar(&drawn, &scale);
                 return true;
             }
