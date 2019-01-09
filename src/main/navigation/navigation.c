@@ -2104,7 +2104,7 @@ void updateHomePosition(void)
                 case NAV_RESET_ON_FIRST_ARM:
                     setHome |= !ARMING_FLAG(WAS_EVER_ARMED);
                     break;
-                case NAV_RESET_ON_EACH_ARM:
+                case NAV_RESET_ON_EACH_ARM: 
                     setHome = true;
                     break;
             }
@@ -2130,49 +2130,52 @@ void updateHomePosition(void)
 
         // Update distance and direction to home if armed (home is not updated when armed)
         if (STATE(GPS_FIX_HOME)) {
-
-
             /* LLH Location in NEU axis system */
-
-            //START CAMILLE
-
-            gpsLocation_t planeLocation;
-            fpVector3_t posPlane;
-
-			//INITIALISE 5 PLANES (waypoint 100 to 105)
-			for (int i = 0; i < 4; i++) {
-				planesInfos[i].planeWP.lat=0;
-                planesInfos[i].drawn=0;
-				planesInfos[i].planeWP.lon=0;
-				planesInfos[i].planeWP.alt=0;
-			}
-
-
-            int y=0; // plane array init
-            for (int i = 1; i < MAX_PLANES+1; i++) { //store waypoint 1 to 5
-            
-                    getWaypoint(i,&planesInfos[y].planeWP); //load waypoint informations
-                    planesInfos[y].wp_nb=i; //store wp number
-                    //Create gpsLocation_t in order to Convert to POS vector with  geoConvertGeodeticToLocal
-                    planeLocation.lat=planesInfos[y].planeWP.lat;
-                    planeLocation.lon=planesInfos[y].planeWP.lon;
-                    planeLocation.alt=planesInfos[y].planeWP.alt;
-                    geoConvertGeodeticToLocal(&posControl.gpsOrigin, &planeLocation, &posPlane, GEO_ALT_ABSOLUTE);
-                    planesInfos[y].GPS_directionToMe= calculateDistanceToDestination(&posPlane);
-                    planesInfos[y].planePoiDirection=calculateDistanceToDestination(&posPlane);
-                    planesInfos[y].GPS_altitudeToMe=calculateAltitudeToMe(&posPlane);
-                    
-					y++;
-                }
-
-
-            //END CAMILLE
-
             posControl.homeDistance = calculateDistanceToDestination(&posControl.homePosition.pos);
             posControl.homeDirection = calculateBearingToDestination(&posControl.homePosition.pos);
             updateHomePositionCompatibility();
         }
     }
+}
+
+/************************************
+* UPDATE GET INFORMATION ABOUT POINT
+*/
+static void navRadarUpdatePlane(void){
+   //START CAMILLE
+
+    gpsLocation_t planeLocation;
+    fpVector3_t posPlane;
+
+
+  //if (STATE(GPS_FIX_HOME)) {
+    //INITIALISE 5 PLANES (waypoint 100 to 105)
+    for (int i = 0; i < 4; i++) {
+        planesInfos[i].planeWP.lat=0;
+        planesInfos[i].drawn=0;
+        planesInfos[i].planeWP.lon=0;
+        planesInfos[i].planeWP.alt=0;
+    }
+
+
+    int y=0; // plane array init
+    for (int i = 1; i < MAX_PLANES+1; i++) { //store waypoint 1 to 5
+
+            getWaypoint(i,&planesInfos[y].planeWP); //load waypoint informations
+            planesInfos[y].wp_nb=i; //store wp number
+            //Create gpsLocation_t in order to Convert to POS vector with  geoConvertGeodeticToLocal
+            planeLocation.lat=planesInfos[y].planeWP.lat;
+            planeLocation.lon=planesInfos[y].planeWP.lon;
+            planeLocation.alt=planesInfos[y].planeWP.alt;
+            geoConvertGeodeticToLocal(&posControl.gpsOrigin, &planeLocation, &posPlane, GEO_ALT_ABSOLUTE);
+            planesInfos[y].GPS_directionToMe= calculateDistanceToDestination(&posPlane);
+            planesInfos[y].planePoiDirection=calculateDistanceToDestination(&posPlane);
+            planesInfos[y].GPS_altitudeToMe=calculateAltitudeToMe(&posPlane);
+            
+            y++;
+        }
+
+ // }
 }
 
 /*-----------------------------------------------------------
@@ -2485,7 +2488,9 @@ void setWaypoint(uint8_t wpNumber, const navWaypoint_t * wpData)
         setDesiredPosition(&wpPos.pos, DEGREES_TO_CENTIDEGREES(wpData->p1), waypointUpdateFlags);
     }
     // WP #1 - #15 - common waypoints - pre-programmed mission
-    else if ((wpNumber >= 1) && (wpNumber <= NAV_MAX_WAYPOINTS) && !ARMING_FLAG(ARMED)) {
+    //STARTCAM
+    //else if ((wpNumber >= 1) && (wpNumber <= NAV_MAX_WAYPOINTS) && !ARMING_FLAG(ARMED)) {
+    else if ((wpNumber >= 1) && (wpNumber <= NAV_MAX_WAYPOINTS)) {
         if (wpData->action == NAV_WP_ACTION_WAYPOINT || wpData->action == NAV_WP_ACTION_RTH) {
             // Only allow upload next waypoint (continue upload mission) or first waypoint (new mission)
             if (wpNumber == (posControl.waypointCount + 1) || wpNumber == 1) {
@@ -2999,6 +3004,9 @@ void updateWaypointsAndNavigationMode(void)
 
     // Map navMode back to enabled flight modes
     switchNavigationFlightModes();
+
+    // Update InavRadar
+    navRadarUpdatePlane();
 
 #if defined(NAV_BLACKBOX)
     navCurrentState = (int16_t)posControl.navPersistentId;

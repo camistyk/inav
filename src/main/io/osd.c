@@ -1203,7 +1203,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
 
                     // Now start looking for a valid scale that lets us draw everything
                     int ii;
-                    for (ii = 0; ii < 50; ii++) {
+                   // for (ii = 0; ii < 50; ii++) {
                         // Calculate location of the aircraft in map
                         int points = poiDistance / ((float)scale / charHeight);
 
@@ -1252,7 +1252,7 @@ static void osdDrawRadarMap(wp_planes_t *planes, uint16_t *drawnPlanes, uint32_t
                         //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
                         myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
                         break;
-                    }
+                   // }
                     
                 }
 
@@ -1440,7 +1440,7 @@ if (currentPlane.planeWP.p3==1){
 
             // Now start looking for a valid scale that lets us draw everything
             int ii;
-            for (ii = 0; ii < 50; ii++) {
+         //   for (ii = 0; ii < 50; ii++) {
                 // Calculate location of the aircraft in map
                 int points = poiDistance / ((float)scale / charHeight);
 
@@ -1514,7 +1514,7 @@ if (currentPlane.planeWP.p3==1){
                 //STORE POSITION IN ORDER TO BE DELETED IF NEW UPDATE
                 myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
                 break;
-            }
+            //}
             
         }
 
