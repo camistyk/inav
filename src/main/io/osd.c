@@ -1758,10 +1758,12 @@ static void osdSimpleRadar(uint16_t *drawn, uint32_t *usedScale)
     for (plane_id=0;plane_id<MAX_PLANES;plane_id++)
     {
         currentPlane=planesInfos[plane_id];
-        int16_t directionToPlane=planesInfos[plane_id].planePoiDirection/100;
-        int16_t distanceToMe=planesInfos[plane_id].GPS_directionToMe/100;
-        int16_t poiDirection = osdGetHeadingAngle(directionToPlane + 180);
-         osdSimpleMap(reference, 0, SYM_ARROW_UP, distanceToMe,  directionToPlane, SYM_HOME, myDrawn[plane_id], usedScale);
+        if (currentPlane.planeWP.p3==1){
+            int16_t directionToPlane=planesInfos[plane_id].planePoiDirection/100;
+            int16_t distanceToMe=planesInfos[plane_id].GPS_directionToMe/100;
+            int16_t poiDirection = osdGetHeadingAngle(directionToPlane + 180);
+            osdSimpleMap(reference, 0, SYM_ARROW_UP, distanceToMe,  directionToPlane, SYM_HOME, myDrawn[plane_id], usedScale);
+        }
     }
 }
 
