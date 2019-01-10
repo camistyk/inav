@@ -1093,7 +1093,7 @@ static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t cen
     // First, erase the previous drawing.
     //Remove this function to clear when all is drawed
 
-    if (OSD_VISIBLE(*drawn)) {
+    if (OSD_VISIBLE(myDrawn[plane_id])) {
         displayWriteChar(osdDisplayPort, OSD_X(myDrawn[plane_id]), OSD_Y(myDrawn[plane_id]), SYM_BLANK);
     }
 
