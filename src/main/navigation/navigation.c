@@ -2164,7 +2164,7 @@ static void navRadarUpdatePlane(void){
 
 
     int y=0; // plane array init
-    for (int i = 20; i < MAX_PLANES+1; i++) { //store waypoint 1 to 5
+    for (int i = START_RADAR_WAYPOINT; i < MAX_PLANES+1; i++) { //store waypoint 1 to 5
 
             getWaypoint(i,&planesInfos[y].planeWP); //load waypoint informations
             planesInfos[y].wp_nb=i; //store wp number
