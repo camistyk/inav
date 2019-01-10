@@ -2165,7 +2165,7 @@ static void navRadarUpdatePlane(void){
 
     int y=0; // plane array init
     //store waypoint 1 to 5a
-    for (int i = 20; i < 26; i++) { 
+      for (int i = 1; i < MAX_PLANES+1; i++) { //store waypoint 1 to 5
 
             getWaypoint(i,&planesInfos[y].planeWP); //load waypoint informations
             planesInfos[y].wp_nb=i; //store wp number
@@ -2505,13 +2505,10 @@ void setWaypoint(uint8_t wpNumber, const navWaypoint_t * wpData)
                 posControl.waypointListValid = (wpData->flag == NAV_WP_FLAG_LAST);
             }
         }
+    }else{
+        posControl.waypointList[wpNumber - 1] = *wpData;
     }
-// START CAM
-//Allow update waypoint when flying
-    else if ((wpNumber >= START_RADAR_WAYPOINT)  && (wpNumber <= END_RADAR_WAYPOINT)  && (wpNumber !=255))
-    {
-         posControl.waypointList[wpNumber - 1] = *wpData;
-    }
+
 }
 
 void resetWaypointList(void)
