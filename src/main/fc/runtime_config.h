@@ -100,7 +100,8 @@ typedef enum {
     COMPASS_CALIBRATED      = (1 << 8),
     ACCELEROMETER_CALIBRATED= (1 << 9),
     PWM_DRIVER_AVAILABLE    = (1 << 10),
-    HELICOPTER              = (1 << 11)
+    HELICOPTER              = (1 << 11),
+    INAV_RADAR              = (1 << 12),
 } stateFlags_t;
 
 #define DISABLE_STATE(mask) (stateFlags &= ~(mask))

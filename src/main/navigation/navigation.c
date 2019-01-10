@@ -64,6 +64,7 @@
 #define FW_RTH_CLIMB_MARGIN_MIN_CM  100
 #define FW_RTH_CLIMB_MARGIN_PERCENT 15
 
+
 /*-----------------------------------------------------------
  * Compatibility for home position
  *-----------------------------------------------------------*/
@@ -72,6 +73,9 @@ uint16_t      GPS_distanceToHome;        // distance to home point in meters
 int16_t       GPS_directionToHome;       // direction to home point in degrees
 //START CAMILLE
 wp_planes_t  planesInfos[MAX_PLANES];
+
+#define START_RADAR_WAYPOINT 20
+#define END_RADAR_WAYPOINT 50
 
 //END CAM
 #if defined(USE_NAV)
@@ -2140,7 +2144,8 @@ void updateHomePosition(void)
 
 /************************************
 * UPDATE GET INFORMATION ABOUT POINT
-*/
+***********************************/
+
 static void navRadarUpdatePlane(void){
    //START CAMILLE
 
@@ -2167,11 +2172,12 @@ static void navRadarUpdatePlane(void){
             planeLocation.lat=planesInfos[y].planeWP.lat;
             planeLocation.lon=planesInfos[y].planeWP.lon;
             planeLocation.alt=planesInfos[y].planeWP.alt;
-            geoConvertGeodeticToLocal(&posControl.gpsOrigin, &planeLocation, &posPlane, GEO_ALT_ABSOLUTE);
+            geoConvertGeodeticToLocal(&posControl.gpsOrigin, &planeLocation, &posPlane, GEO_ALT_RELATIVE);
             planesInfos[y].GPS_directionToMe= calculateDistanceToDestination(&posPlane);
-            planesInfos[y].planePoiDirection=calculateDistanceToDestination(&posPlane);
+            planesInfos[y].planePoiDirection=calculateBearingToDestination(&posPlane);
             planesInfos[y].GPS_altitudeToMe=calculateAltitudeToMe(&posPlane);
             
+
             y++;
         }
 
@@ -2488,9 +2494,8 @@ void setWaypoint(uint8_t wpNumber, const navWaypoint_t * wpData)
         setDesiredPosition(&wpPos.pos, DEGREES_TO_CENTIDEGREES(wpData->p1), waypointUpdateFlags);
     }
     // WP #1 - #15 - common waypoints - pre-programmed mission
-    //STARTCAM
-    //else if ((wpNumber >= 1) && (wpNumber <= NAV_MAX_WAYPOINTS) && !ARMING_FLAG(ARMED)) {
-    else if ((wpNumber >= 1) && (wpNumber <= NAV_MAX_WAYPOINTS)) {
+    
+    else if ((wpNumber >= 1) && (wpNumber <= NAV_MAX_WAYPOINTS) && !ARMING_FLAG(ARMED)) {
         if (wpData->action == NAV_WP_ACTION_WAYPOINT || wpData->action == NAV_WP_ACTION_RTH) {
             // Only allow upload next waypoint (continue upload mission) or first waypoint (new mission)
             if (wpNumber == (posControl.waypointCount + 1) || wpNumber == 1) {
@@ -2499,6 +2504,12 @@ void setWaypoint(uint8_t wpNumber, const navWaypoint_t * wpData)
                 posControl.waypointListValid = (wpData->flag == NAV_WP_FLAG_LAST);
             }
         }
+    }
+// START CAM
+//Allow update waypoint when flying
+    else if ((wpNumber >= START_RADAR_WAYPOINT)  && (wpNumber <= END_RADAR_WAYPOINT)  && (wpNumber !=255))
+    {
+         posControl.waypointList[wpNumber - 1] = *wpData;
     }
 }
 
