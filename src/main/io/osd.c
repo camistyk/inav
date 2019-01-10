@@ -1060,7 +1060,7 @@ static void osdDrawMap(int referenceHeading, uint8_t referenceSym, uint8_t cente
 
 static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t centerSym,
                        uint32_t poiDistance, int16_t poiDirection, uint8_t poiSymbol,
-                       uint16_t *drawn, uint32_t *usedScale)
+                       uint16_t *drawn, uint32_t *usedScale,int plane_id)
 {
     // TODO: These need to be tested with several setups. We might
     // need to make them configurable.
@@ -1094,8 +1094,7 @@ static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t cen
     //Remove this function to clear when all is drawed
 
     if (OSD_VISIBLE(*drawn)) {
-        displayWriteChar(osdDisplayPort, OSD_X(*drawn), OSD_Y(*drawn), SYM_BLANK);
-        *drawn = 0;
+        displayWriteChar(osdDisplayPort, OSD_X(myDrawn[plane_id]), OSD_Y(myDrawn[plane_id]), SYM_BLANK);
     }
 
     uint32_t initialScale;
@@ -1204,7 +1203,8 @@ static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t cen
             displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
 
             // Update saved location
-            *drawn = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+            myDrawn[plane_id]=OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
+           // *drawn = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
             break;
         }
     }
@@ -1762,7 +1762,7 @@ static void osdSimpleRadar(uint16_t *drawn, uint32_t *usedScale)
             int16_t directionToPlane=planesInfos[plane_id].planePoiDirection/100;
             int16_t distanceToMe=planesInfos[plane_id].GPS_directionToMe/100;
             int16_t poiDirection = osdGetHeadingAngle(directionToPlane + 180);
-            osdSimpleMap(reference, 0, SYM_ARROW_UP, distanceToMe,  directionToPlane, SYM_PLANE_HIGH, myDrawn[plane_id], usedScale);
+            osdSimpleMap(reference, 0, SYM_ARROW_UP, distanceToMe,  directionToPlane, SYM_PLANE_HIGH, drawn, usedScale,plane_id);
         }
     }
 }
