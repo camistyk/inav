@@ -1495,7 +1495,7 @@ if (currentPlane.planeWP.p3==1){
                     pitchAngle = constrain(attitude.values.pitch, -600, 600); //-60° to +60° FOV Lens 120°
                     pitchAngle = ((pitchAngle * 25) / 600) - 41;
                     int poiYFV=map(pitchAngle,-600,600,minY,maxY); //map to OSD screen 60° for 120°FOV/2
-                    poiYFV=poiYFV+(relativAlt/scale);
+                    poiYFV=poiYFV+(relativAlt);
                     poiYFV=constrain(poiYFV,minY,maxY);
 
                 //if plane is behind you draw it on the middle right or left edge
@@ -1507,7 +1507,8 @@ if (currentPlane.planeWP.p3==1){
                         poiX=minX;
                     }
                 }
-                displayWriteChar(osdDisplayPort, poiX, poiYFV, poiSymbol);
+                poiY=poiYFV;
+                displayWriteChar(osdDisplayPort, poiX, poiY, poiSymbol);
 
                 // Update saved location
                 *drawnPlanes = OSD_POS(poiX, poiY) | OSD_VISIBLE_FLAG;
