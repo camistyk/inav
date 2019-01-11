@@ -1102,20 +1102,14 @@ static void osdDrawAdditionnalRadar(wp_planes_t nearPlane,int16_t poiDirection){
 	 buf[4] = '\0';
 	 displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
 
-			
+     int16_t directionToPlane=nearPlane.planePoiDirection/100;
 	 // Directin of the nearest plane
-	 int mapHeading = poiDirection;
+	 int mapHeading = osdGetHeadingAngle(directionToPlane);
 	 poiSymbolPlaneSight += mapHeading * 2 / 45;
 	 buf[0] = poiSymbolPlaneSight;
 	 displayWrite(osdDisplayPort, minX , maxY-2, buf);
 
 }
-
-
-
-
-
-
 
 
 static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t centerSym,
@@ -1270,9 +1264,9 @@ static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t cen
                 if (poiY<midY){
                     poiYFV=midY;
                     if (poiX>midX){
-                        poiX=maxX;
+                        poiX=maxX-1;
                     }else{
-                        poiX=minX;
+                        poiX=minX+1;
                     }
                 }
                 poiY=poiYFV;
