@@ -1109,7 +1109,7 @@ static void osdDrawAdditionnalRadar(wp_planes_t nearPlane,int16_t poiDirection){
      memset(buf, 0, sizeof(buf));
      int16_t directionToPlane=nearPlane.planePoiDirection/100;
 	 // Directin of the nearest plane
-	 int mapHeading = osdGetHeadingAngle(directionToPlane);
+	 int mapHeading = osdGetHeadingAngle(directionToPlane-180);
 	 poiSymbolPlaneSight += mapHeading * 2 / 45;
 	 buf[0] = poiSymbolPlaneSight;
 	 displayWrite(osdDisplayPort, minX , maxY-2, buf);
