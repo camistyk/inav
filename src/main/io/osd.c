@@ -1058,7 +1058,7 @@ static void osdDrawMap(int referenceHeading, uint8_t referenceSym, uint8_t cente
 
 
 static void osdDrawAdditionnalRadar(wp_planes_t nearPlane,int16_t poiDirection){
-	
+
   // TODO: These need to be tested with several setups. We might
     // need to make them configurable.
     const int hMargin = 1;
@@ -1078,9 +1078,9 @@ static void osdDrawAdditionnalRadar(wp_planes_t nearPlane,int16_t poiDirection){
 	uint8_t poiSymbolPlaneSight=SYM_ARROW_UP;
 
 	//Get Relative Altitude
-	int32_t myAlt = osdGetAltitude()/100;
-	int relativAlt=myAlt-(nearPlane.planeWP.alt/100);
-	
+	int32_t myAlt = osdGetAltitude();
+	int relativAlt=myAlt-(nearPlane.planeWP.alt);
+
 	//DRAW altitude of nearest plane EXPERIMENTAL
 	 if(relativAlt>0){
 		 buf[0]=SYM_LESS;
@@ -1135,7 +1135,7 @@ static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t cen
     uint8_t midY = osdDisplayPort->rows / 2;
 
     // Fixed marks
-   
+
    /* if (referenceSym) {
         displayWriteChar(osdDisplayPort, maxX, minY, SYM_DIRECTION);
         displayWriteChar(osdDisplayPort, maxX, minY + 1, referenceSym);
@@ -1247,12 +1247,12 @@ static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t cen
                     continue;
                 }
             }
-			
+
 			int32_t myAlt = osdGetAltitude()/100;
 			wp_planes_t currentPlane=planesInfos[plane_id];
 
 			if (frontview){
-				
+
 				int relativAlt=myAlt-(currentPlane.planeWP.alt/100);
 				int pitchAngle = constrain(attitude.values.pitch, -600, 600); //-60° to +60° FOV Lens 120°
 				pitchAngle = ((pitchAngle * 25) / 600) - 41;
@@ -1272,7 +1272,7 @@ static void osdSimpleMap(int referenceHeading, uint8_t referenceSym, uint8_t cen
                 poiY=poiYFV;
 			}
 				//CHANGE SYMBOL IF HIGHER OR LOWER
-				
+
 				int currentPlaneAlt=currentPlane.planeWP.alt/100;
                  if (near_plane_id==plane_id){
                      poiSymbol=SYM_PLANE_SIGHT;
@@ -1338,11 +1338,11 @@ static void osdDrawRadar(uint16_t *drawn, uint32_t *usedScale)
 //GET nearest plane by testing distances
 static int getNearestPlaneId(int16_t distanceToMe,int currentPlaneId )
 {
-	
+
 	//CALCULATE NEAREST PLANE
 	int16_t min = distanceToMe;
 	int plane_id_near=0;
-	 for (int c = 0; c < MAX_PLANES; c++) 
+	 for (int c = 0; c < MAX_PLANES; c++)
 	 {
 		 if ((planesInfos[c].GPS_directionToMe!=0) &&  (c!=currentPlaneId)){
 				 if ((planesInfos[c].GPS_directionToMe/100) < min) {
@@ -1359,26 +1359,26 @@ static void osdSimpleRadar(uint16_t *drawn, uint32_t *usedScale,bool frontview)
     int16_t reference = DECIDEGREES_TO_DEGREES(osdGetHeading());
     wp_planes_t currentPlane;
     int plane_id=0;
-	
+
 	//DISPLAY POINT OFF EACH PLANES
     for (plane_id=0;plane_id<MAX_PLANES;plane_id++)
     {
         currentPlane=planesInfos[plane_id];
-		
+
 		//TEST IF PLANE IS FLYING (Armed) else dont display
         if (currentPlane.planeWP.p3==1){
-			
+
 			// GET CURRENT PLANE INFOS TO DISPLAY PLANES
             int16_t directionToPlane=planesInfos[plane_id].planePoiDirection/100;
             int16_t distanceToMe=planesInfos[plane_id].GPS_directionToMe/100;
             int16_t poiDirection = osdGetHeadingAngle(directionToPlane + 180);
-			
+
 			//get Id of nearest plane of me
 			int nearPlaneId=getNearestPlaneId(distanceToMe,plane_id);
-			
+
 			//DRAW NAV RADAR MAP
 			osdSimpleMap(reference, 0, SYM_ARROW_UP, distanceToMe,  directionToPlane, SYM_PLANE_HIGH, drawn, usedScale,plane_id,frontview,nearPlaneId);
-			
+
 			// DRAW OSD ADDITIONNAL NAV RADAR PLANE INFO
 			osdDrawAdditionnalRadar(planesInfos[nearPlaneId],poiDirection);
         }
@@ -1709,18 +1709,18 @@ static bool osdDrawSingleElement(uint8_t item)
                 if ( navConfig()->fw.nav_radar_scale>0){
                     scale=navConfig()->fw.nav_radar_scale;
                 }
- 
+
                 //DISPLAY FrontViewMap
                 bool frontview=true;
                 osdSimpleRadar(&drawn, &scale,frontview);
 
              //   osdDrawRadar(&drawn, &scale);
 
-           
+
 
             return true;
         }
-        
+
     case OSD_RADAR:
             {
                 static uint16_t drawn = 0;
