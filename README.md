@@ -1,10 +1,5 @@
-##Facebook Page
-https://www.facebook.com/groups/360607501179901/
+# Install guide
 
-##Telegramm flow
-https://t.me/joinchat/AAAAAFAMKDL0VEDvdj4vXQ
-
-##Project description
-
-See documentation here : https://docs.google.com/document/d/1lCLEhHTlBsdZolSkiMFve64DzqQgiQNSZ0CbjeS6SgI
+1- Flash this firmware to FC
+2- Enable MSP on the uart where is wired your ESP module
 
