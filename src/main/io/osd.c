@@ -1345,7 +1345,7 @@ static int getNearestPlaneId(int16_t distanceToMe,int currentPlaneId )
 	 for (int c = 0; c < MAX_PLANES; c++)
 	 {
 		 if ((planesInfos[c].GPS_directionToMe!=0) &&  (c!=currentPlaneId)){
-				 if ((planesInfos[c].GPS_directionToMe/100) < min) {
+				 if ((planesInfos[c].GPS_directionToMe) < min) {
 				 plane_id_near = c;
 				 min = planesInfos[c].GPS_directionToMe;
 				 }
