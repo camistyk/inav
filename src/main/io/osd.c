@@ -1090,24 +1090,31 @@ static void osdDrawAdditionnalRadar(wp_planes_t nearPlane,int16_t poiDirection){
 		 buf[1] = '\0';
 	 }
 	 displayWrite(osdDisplayPort, minX, maxY-1, buf);
-
+     
+     memset(buf, 0, sizeof(buf));
 	 osdFormatCentiNumber(buf, abs(relativAlt), scaleUnitDivisor, maxDecimals, 2, 3);
 	 buf[3]= SYM_ALT_M;
 	 buf[4] = '\0';
 	 displayWrite(osdDisplayPort, minX + 1, maxY-1, buf);
 
 	 //DRAW SPEED PLANE NEAREST PLANE
-	 osdFormatCentiNumber(buf, nearPlane.planeWP.p1, scaleUnitDivisor, maxDecimals, 2, 3);
-	 buf[3] = SYM_KMH;
-	 buf[4] = '\0';
+     memset(buf, 0, sizeof(buf));
+     osdFormatVelocityStr(buf,  nearPlane.planeWP.p1);
 	 displayWrite(osdDisplayPort, minX + 1, maxY-2, buf);
 
+     memset(buf, 0, sizeof(buf));
      int16_t directionToPlane=nearPlane.planePoiDirection/100;
 	 // Directin of the nearest plane
 	 int mapHeading = osdGetHeadingAngle(directionToPlane);
 	 poiSymbolPlaneSight += mapHeading * 2 / 45;
 	 buf[0] = poiSymbolPlaneSight;
 	 displayWrite(osdDisplayPort, minX , maxY-2, buf);
+    
+    memset(buf, 0, sizeof(buf));
+    osdFormatDistanceSymbol(buf, nearPlane.GPS_directionToMe/100);
+    buf[3]= SYM_TRIP_DIST;
+	buf[4] = '\0';
+    displayWrite(osdDisplayPort, minX , maxY, buf);
 
 }
 
