@@ -175,6 +175,10 @@ static displayPort_t *osdDisplayPort;
 
 PG_REGISTER_WITH_RESET_FN(osdConfig_t, osdConfig, PG_OSD_CONFIG, 3);
 
+unsigned int round_closest(unsigned int dividend, unsigned int divisor)
+{
+    return (dividend + (divisor / 2)) / divisor;
+}
 
 int map(int x, int in_min, int in_max, int out_min, int out_max)
 {
@@ -1111,7 +1115,7 @@ static void osdDrawAdditionnalRadar(wp_planes_t nearPlane,int16_t poiDirection){
 	 displayWrite(osdDisplayPort, minX , maxY-2, buf);
     
     memset(buf, 0, sizeof(buf));
-    osdFormatDistanceSymbol(buf, nearPlane.GPS_directionToMe*100);
+    osdFormatDistanceSymbol(buf, nearPlane.GPS_directionToMe);
     displayWrite(osdDisplayPort, minX , maxY, buf);
 
 }
