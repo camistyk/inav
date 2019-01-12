@@ -31,8 +31,8 @@ const timerHardware_t timerHardware[] = {
     { TIM2, IO_TAG(PB10),   TIM_Channel_3, 1, IOCFG_AF_PP_PD, GPIO_AF_TIM2, TIM_USE_MC_SERVO | TIM_USE_FW_SERVO },  //S6
     { TIM2, IO_TAG(PA15),   TIM_Channel_1, 1, IOCFG_AF_PP_PD, GPIO_AF_TIM2, TIM_USE_MC_CHNFW | TIM_USE_FW_SERVO },  //S7
 
-    { TIM1, IO_TAG(PA8),    TIM_Channel_1, 1, IOCFG_AF_PP_PD, GPIO_AF_TIM1, TIM_USE_LED},   //2812LED
-    { TIM5, IO_TAG(PA0),    TIM_Channel_1, 0, IOCFG_AF_PP_PD, GPIO_AF_TIM5, TIM_USE_PPM },  //use rssi pad for PPM/softserial_tx1
+    { TIM1, IO_TAG(PA8),    TIM_Channel_1, 1, IOCFG_AF_PP_PD, GPIO_AF_TIM1, TIM_USE_PWM},   //2812LED
+    { TIM5, IO_TAG(PA0),    TIM_Channel_1, 0, IOCFG_AF_PP_PD, GPIO_AF_TIM5, TIM_USE_PWM},  //use rssi pad for PPM/softserial_tx1
 };
 
 const int timerHardwareCount = sizeof(timerHardware) / sizeof(timerHardware[0]);
